@@ -1,9 +1,9 @@
 ##############################################################################
-##                                 qlibclib                                 ##
+##                                  qlibc™                                  ##
 ##                                                                          ##
-##                   Copyright © 2010-2015 Seungyoung Kim                   ##
-##                      Copyright © 2019 ARQADIUM, LLC                      ##
-##                           All rights reserved.                           ##
+##               Copyright © 2010-2015 Seungyoung “Steve” Kim               ##
+##                      Copyright © 2020 ARQADIUM, LLC                      ##
+##                       Licenced under BSD-2-Clause.                       ##
 ##############################################################################
 
 include base.mk

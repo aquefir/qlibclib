@@ -1,4 +1,12 @@
 #!/bin/sh
+# -*- coding: utf-8 -*-
+##############################################################################
+##                                  qlibc™                                  ##
+##                                                                          ##
+##               Copyright © 2010-2015 Seungyoung “Steve” Kim               ##
+##                      Copyright © 2020 ARQADIUM, LLC                      ##
+##                       Licenced under BSD-2-Clause.                       ##
+##############################################################################
 
 if [ $# = 0 ]; then
 	echo "This program is called by make. Please use \"make test\" command instead."
