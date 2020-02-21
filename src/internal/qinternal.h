@@ -116,7 +116,7 @@ struct qmutex_s {
             if(_ret == 0) break;                                        \
             DEBUG("Q_MUTEX: can't get lock - force to unlock. [%d]",    \
                   _ret);                                                \
-            Q_MUTEX_LEAVE(x);                                           \
+            Q_MUTEX_LEAVE(m);                                           \
         }                                                               \
         x->count++;                                                     \
         x->owner = pthread_self();                                      \
@@ -129,7 +129,7 @@ struct qmutex_s {
         int _ret;                                                       \
         while((_ret = pthread_mutex_destroy(&(x->mutex))) != 0) {       \
             DEBUG("Q_MUTEX: force to unlock mutex. [%d]", _ret);        \
-            Q_MUTEX_LEAVE(x);                                           \
+            Q_MUTEX_LEAVE(m);                                           \
         }                                                               \
         free(x);                                                        \
     } while(0)
