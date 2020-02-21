@@ -1,16 +1,16 @@
-What's qLibc?
-=============
+What is qlibc?
+===============
 
-qLibc is currently one of the most functionally-complete, publicly-licensed
-C/C++ libraries. The goal of the qLibc project is to provide a **simple and
-powerful general purpose C/C++ library** that includes all kinds of containers
-and general library routines. It provides a ready-made set of common container
-APIs with a consistent API look.
+qlibc is currently one of the most functionally-complete publicly-licensed
+C/C++ support libraries. The goal of the qlibc project is to provide a
+**simple and powerful general-purpose C/C++ library** that includes all kinds
+of containers and library routines. It provides a ready-made set of common
+container APIs with a consistent API look.
 
-## qLibc Copyright
+## qlibc copyright
 
-qLibc is published under 2-clause BSD license known as Simplified BSD License.
-Please refer the LICENSE document included in the package for more details.
+qlibc is published under 2-clause BSD license known as Simplified BSD License.
+Please refer the COPYING document included in the package for more details.
 
 ## API Reference
 
@@ -34,7 +34,7 @@ Please refer the LICENSE document included in the package for more details.
     * Hashes --- Murmur hases, FNV hases, MD5 hashes, ...
     * Time --- time diff, time format converstion, ...
 
-* [qLibc Extension API Reference](http://wolkykim.github.io/qlibc/doc/html/files.html)
+* [qlibc Extension API Reference](http://wolkykim.github.io/qlibc/doc/html/files.html)
   * Apache-style Configuration File Parser.
   * INI-style Configuration File Parser.
   * HTTP client.
@@ -42,7 +42,7 @@ Please refer the LICENSE document included in the package for more details.
   * Database(MySQL) interface.
   * [Token-Bucket](http://en.wikipedia.org/wiki/Token_bucket)
 
-## qLibc Tables at a Glance
+## qlibc Tables at a Glance
 
 | Characteristics     | Tree Table   | Hash Table   |Static Hash Table| List Table   |
 |:--------------------|:------------:|:------------:|:---------------:|:------------:|
@@ -97,7 +97,7 @@ An examples below illustrates how it looks like.
 
 Here is an identical implementation with a Linked-List-Table container.
 You may notice that there aren't any code changes at all, except for 1 line
-in the table creation. This is why qLibc encapsulates corresponding function
+in the table creation. This is why qlibc encapsulates corresponding function
 pointers inside of the container object.
 
 ~~~{.c}
@@ -121,7 +121,7 @@ pointers inside of the container object.
 
 ## Looking for people to work with.
 
-We're looking for people who want to work together to develop and improve qLibc.
+We're looking for people who want to work together to develop and improve qlibc.
 Currently, we have high demands on following areas.
 
 * Automated testing
@@ -151,5 +151,3 @@ The following people have helped with suggestions, ideas, code or fixing bugs:
 * RQ
 * [Ryan Gonzalez](https://github.com/kirbyfan64)
 * Umesh
-
-If we have forgotten or misspelled your name, please let us know.
