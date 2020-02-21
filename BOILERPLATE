@@ -1,0 +1,21 @@
+This file contains the project’s copypastable boilerplate comment headers.
+
+Boilerplate for C-like languages:
+
+/****************************************************************************\
+ *                                  qlibc™                                  *
+ *                                                                          *
+ *               Copyright © 2010-2015 Seungyoung “Steve” Kim               *
+ *                      Copyright © 2020 ARQADIUM, LLC                      *
+ *                       Licenced under BSD-2-Clause.                       *
+\****************************************************************************/
+
+Hash-based boilerplate (Python, POSIX shell, Makefile):
+
+##############################################################################
+##                                  qlibc™                                  ##
+##                                                                          ##
+##               Copyright © 2010-2015 Seungyoung “Steve” Kim               ##
+##                      Copyright © 2020 ARQADIUM, LLC                      ##
+##                       Licenced under BSD-2-Clause.                       ##
+##############################################################################
