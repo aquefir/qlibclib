@@ -1,4 +1,3 @@
-Makefile
 *.o
 /\.*
 /config.h
@@ -13,3 +12,8 @@ Makefile
 /tests/test_*
 !/tests/test_*\.c
 !/tests/test_*\.h
+/3rdparty/*
+!/3rdparty/.touched
+*.a
+*.so*
+*.dylib
