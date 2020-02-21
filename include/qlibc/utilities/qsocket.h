@@ -43,11 +43,11 @@
 extern "C" {
 #endif
 
-extern int qsocket_open(const char *hostname, int port, int timeoutms);
-extern bool qsocket_close(int sockfd, int timeoutms);
-extern bool qsocket_get_addr(struct sockaddr_in *addr, const char *hostname,
-                             int port);
-extern char *qsocket_get_localaddr(char *buf, size_t bufsize);
+extern int qsocket_open( const char* hostname, int port, int timeoutms );
+extern bool qsocket_close( int sockfd, int timeoutms );
+extern bool qsocket_get_addr(
+   struct sockaddr_in* addr, const char* hostname, int port );
+extern char* qsocket_get_localaddr( char* buf, size_t bufsize );
 
 #ifdef __cplusplus
 }

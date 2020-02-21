@@ -62,4 +62,3 @@
 #include "ipc/qshm.h"
 
 #endif /* QLIBC_H */
-

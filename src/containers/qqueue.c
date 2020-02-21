@@ -126,43 +126,46 @@
  *   Available options:
  *   - QQUEUE_THREADSAFE - make it thread-safe.
  */
-qqueue_t *qqueue(int options) {
-    qqueue_t *queue = (qqueue_t *) malloc(sizeof(qqueue_t));
-    if (queue == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
+qqueue_t* qqueue( int options )
+{
+	qqueue_t* queue = (qqueue_t*)malloc( sizeof( qqueue_t ) );
+	if( queue == NULL )
+	{
+		errno = ENOMEM;
+		return NULL;
+	}
 
-    memset((void *) queue, 0, sizeof(qqueue_t));
-    queue->list = qlist(options);
-    if (queue->list == NULL) {
-        free(queue);
-        return NULL;
-    }
+	memset( (void*)queue, 0, sizeof( qqueue_t ) );
+	queue->list = qlist( options );
+	if( queue->list == NULL )
+	{
+		free( queue );
+		return NULL;
+	}
 
-    // methods
-    queue->setsize = qqueue_setsize;
+	// methods
+	queue->setsize = qqueue_setsize;
 
-    queue->push = qqueue_push;
-    queue->pushstr = qqueue_pushstr;
-    queue->pushint = qqueue_pushint;
+	queue->push    = qqueue_push;
+	queue->pushstr = qqueue_pushstr;
+	queue->pushint = qqueue_pushint;
 
-    queue->pop = qqueue_pop;
-    queue->popstr = qqueue_popstr;
-    queue->popint = qqueue_popint;
-    queue->popat = qqueue_popat;
+	queue->pop    = qqueue_pop;
+	queue->popstr = qqueue_popstr;
+	queue->popint = qqueue_popint;
+	queue->popat  = qqueue_popat;
 
-    queue->get = qqueue_get;
-    queue->getstr = qqueue_getstr;
-    queue->getint = qqueue_getint;
-    queue->getat = qqueue_getat;
+	queue->get    = qqueue_get;
+	queue->getstr = qqueue_getstr;
+	queue->getint = qqueue_getint;
+	queue->getat  = qqueue_getat;
 
-    queue->size = qqueue_size;
-    queue->clear = qqueue_clear;
-    queue->debug = qqueue_debug;
-    queue->free = qqueue_free;
+	queue->size  = qqueue_size;
+	queue->clear = qqueue_clear;
+	queue->debug = qqueue_debug;
+	queue->free  = qqueue_free;
 
-    return queue;
+	return queue;
 }
 
 /**
@@ -174,8 +177,9 @@ qqueue_t *qqueue(int options) {
  *
  * @return previous maximum number.
  */
-size_t qqueue_setsize(qqueue_t *queue, size_t max) {
-    return queue->list->setsize(queue->list, max);
+size_t qqueue_setsize( qqueue_t* queue, size_t max )
+{
+	return queue->list->setsize( queue->list, max );
 }
 
 /**
@@ -192,8 +196,9 @@ size_t qqueue_setsize(qqueue_t *queue, size_t max) {
  *                limited number of elements)
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qqueue_push(qqueue_t *queue, const void *data, size_t size) {
-    return queue->list->addlast(queue->list, data, size);
+bool qqueue_push( qqueue_t* queue, const void* data, size_t size )
+{
+	return queue->list->addlast( queue->list, data, size );
 }
 
 /**
@@ -210,12 +215,14 @@ bool qqueue_push(qqueue_t *queue, const void *data, size_t size) {
  *                limited number of elements.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qqueue_pushstr(qqueue_t *queue, const char *str) {
-    if (str == NULL) {
-        errno = EINVAL;
-        return false;
-    }
-    return queue->list->addlast(queue->list, str, strlen(str) + 1);
+bool qqueue_pushstr( qqueue_t* queue, const char* str )
+{
+	if( str == NULL )
+	{
+		errno = EINVAL;
+		return false;
+	}
+	return queue->list->addlast( queue->list, str, strlen( str ) + 1 );
 }
 
 /**
@@ -230,8 +237,9 @@ bool qqueue_pushstr(qqueue_t *queue, const char *str) {
  *                limited number of elements.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qqueue_pushint(qqueue_t *queue, int64_t num) {
-    return queue->list->addlast(queue->list, &num, sizeof(num));
+bool qqueue_pushint( qqueue_t* queue, int64_t num )
+{
+	return queue->list->addlast( queue->list, &num, sizeof( num ) );
 }
 
 /**
@@ -246,8 +254,9 @@ bool qqueue_pushint(qqueue_t *queue, int64_t num) {
  *  - ENOENT    : Queue is empty.
  *  - ENOMEM    : Memory allocation failure.
  */
-void *qqueue_pop(qqueue_t *queue, size_t *size) {
-    return queue->list->popfirst(queue->list, size);
+void* qqueue_pop( qqueue_t* queue, size_t* size )
+{
+	return queue->list->popfirst( queue->list, size );
 }
 
 /**
@@ -264,14 +273,16 @@ void *qqueue_pop(qqueue_t *queue, size_t *size) {
  * @note
  * The string element should be pushed through pushstr().
  */
-char *qqueue_popstr(qqueue_t *queue) {
-    size_t strsize;
-    char *str = queue->list->popfirst(queue->list, &strsize);
-    if (str != NULL) {
-        str[strsize - 1] = '\0';  // just to make sure
-    }
+char* qqueue_popstr( qqueue_t* queue )
+{
+	size_t strsize;
+	char* str = queue->list->popfirst( queue->list, &strsize );
+	if( str != NULL )
+	{
+		str[strsize - 1] = '\0'; // just to make sure
+	}
 
-    return str;
+	return str;
 }
 
 /**
@@ -288,15 +299,17 @@ char *qqueue_popstr(qqueue_t *queue) {
  * @note
  * The integer element should be pushed through pushint().
  */
-int64_t qqueue_popint(qqueue_t *queue) {
-    int64_t num = 0;
-    int64_t *pnum = queue->list->popfirst(queue->list, NULL);
-    if (pnum != NULL) {
-        num = *pnum;
-        free(pnum);
-    }
+int64_t qqueue_popint( qqueue_t* queue )
+{
+	int64_t num   = 0;
+	int64_t* pnum = queue->list->popfirst( queue->list, NULL );
+	if( pnum != NULL )
+	{
+		num = *pnum;
+		free( pnum );
+	}
 
-    return num;
+	return num;
 }
 
 /**
@@ -317,8 +330,9 @@ int64_t qqueue_popint(qqueue_t *queue) {
  *  queue. For example, index -1 will always pop a element which is pushed at
  *  very last time.
  */
-void *qqueue_popat(qqueue_t *queue, int index, size_t *size) {
-    return queue->list->popat(queue->list, index, size);
+void* qqueue_popat( qqueue_t* queue, int index, size_t* size )
+{
+	return queue->list->popat( queue->list, index, size );
 }
 
 /**
@@ -334,8 +348,9 @@ void *qqueue_popat(qqueue_t *queue, int index, size_t *size) {
  *  - ENOENT    : Queue is empty.
  *  - ENOMEM    : Memory allocation failure.
  */
-void *qqueue_get(qqueue_t *queue, size_t *size, bool newmem) {
-    return queue->list->getfirst(queue->list, size, newmem);
+void* qqueue_get( qqueue_t* queue, size_t* size, bool newmem )
+{
+	return queue->list->getfirst( queue->list, size, newmem );
 }
 
 /**
@@ -352,14 +367,16 @@ void *qqueue_get(qqueue_t *queue, size_t *size, bool newmem) {
  * @note
  * The string element should be pushed through pushstr().
  */
-char *qqueue_getstr(qqueue_t *queue) {
-    size_t strsize;
-    char *str = queue->list->getfirst(queue->list, &strsize, true);
-    if (str != NULL) {
-        str[strsize - 1] = '\0';  // just to make sure
-    }
+char* qqueue_getstr( qqueue_t* queue )
+{
+	size_t strsize;
+	char* str = queue->list->getfirst( queue->list, &strsize, true );
+	if( str != NULL )
+	{
+		str[strsize - 1] = '\0'; // just to make sure
+	}
 
-    return str;
+	return str;
 }
 
 /**
@@ -376,15 +393,17 @@ char *qqueue_getstr(qqueue_t *queue) {
  * @note
  *  The integer element should be pushed through pushint().
  */
-int64_t qqueue_getint(qqueue_t *queue) {
-    int64_t num = 0;
-    int64_t *pnum = queue->list->getfirst(queue->list, NULL, true);
-    if (pnum != NULL) {
-        num = *pnum;
-        free(pnum);
-    }
+int64_t qqueue_getint( qqueue_t* queue )
+{
+	int64_t num   = 0;
+	int64_t* pnum = queue->list->getfirst( queue->list, NULL, true );
+	if( pnum != NULL )
+	{
+		num = *pnum;
+		free( pnum );
+	}
 
-    return num;
+	return num;
 }
 
 /**
@@ -406,8 +425,9 @@ int64_t qqueue_getint(qqueue_t *queue) {
  *  queue. For example, index -1 will always get a element which is pushed at
  *  very last time.
  */
-void *qqueue_getat(qqueue_t *queue, int index, size_t *size, bool newmem) {
-    return queue->list->getat(queue->list, index, size, newmem);
+void* qqueue_getat( qqueue_t* queue, int index, size_t* size, bool newmem )
+{
+	return queue->list->getat( queue->list, index, size, newmem );
 }
 
 /**
@@ -417,8 +437,9 @@ void *qqueue_getat(qqueue_t *queue, int index, size_t *size, bool newmem) {
  *
  * @return the number of elements in this queue.
  */
-size_t qqueue_size(qqueue_t *queue) {
-    return queue->list->size(queue->list);
+size_t qqueue_size( qqueue_t* queue )
+{
+	return queue->list->size( queue->list );
 }
 
 /**
@@ -426,9 +447,7 @@ size_t qqueue_size(qqueue_t *queue) {
  *
  * @param queue qqueue container pointer.
  */
-void qqueue_clear(qqueue_t *queue) {
-    queue->list->clear(queue->list);
-}
+void qqueue_clear( qqueue_t* queue ) { queue->list->clear( queue->list ); }
 
 /**
  * qqueue->debug(): Print out stored elements for debugging purpose.
@@ -438,8 +457,9 @@ void qqueue_clear(qqueue_t *queue) {
  *
  * @return true if successful, otherwise returns false.
  */
-bool qqueue_debug(qqueue_t *queue, FILE *out) {
-    return queue->list->debug(queue->list, out);
+bool qqueue_debug( qqueue_t* queue, FILE* out )
+{
+	return queue->list->debug( queue->list, out );
 }
 
 /**
@@ -449,7 +469,8 @@ bool qqueue_debug(qqueue_t *queue, FILE *out) {
  *
  * @return always returns true.
  */
-void qqueue_free(qqueue_t *queue) {
-    queue->list->free(queue->list);
-    free(queue);
+void qqueue_free( qqueue_t* queue )
+{
+	queue->list->free( queue->list );
+	free( queue );
 }

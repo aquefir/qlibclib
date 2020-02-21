@@ -60,7 +60,7 @@
 
 #ifndef _DOXYGEN_SKIP
 /* internal functions */
-static void refill_tokens(qtokenbucket_t *bucket);
+static void refill_tokens( qtokenbucket_t* bucket );
 #endif
 
 /**
@@ -73,13 +73,16 @@ static void refill_tokens(qtokenbucket_t *bucket);
  * @param tokens_per_sec
  *      number of tokens to fill per a second.
  */
-void qtokenbucket_init(qtokenbucket_t *bucket, int init_tokens, int max_tokens,
-                       int tokens_per_sec) {
-    memset(bucket, 0, sizeof(qtokenbucket_t));
-    bucket->tokens = init_tokens;
-    bucket->max_tokens = max_tokens;
-    bucket->tokens_per_sec = tokens_per_sec;
-    bucket->last_fill = qtime_current_milli();
+void qtokenbucket_init( qtokenbucket_t* bucket,
+   int init_tokens,
+   int max_tokens,
+   int tokens_per_sec )
+{
+	memset( bucket, 0, sizeof( qtokenbucket_t ) );
+	bucket->tokens         = init_tokens;
+	bucket->max_tokens     = max_tokens;
+	bucket->tokens_per_sec = tokens_per_sec;
+	bucket->last_fill      = qtime_current_milli( );
 }
 
 /**
@@ -90,13 +93,15 @@ void qtokenbucket_init(qtokenbucket_t *bucket, int init_tokens, int max_tokens,
  *
  * @return return true if there are enough tokens, otherwise false.
  */
-bool qtokenbucket_consume(qtokenbucket_t *bucket, int tokens) {
-    refill_tokens(bucket);
-    if (bucket->tokens < tokens) {
-        return false;
-    }
-    bucket->tokens -= tokens;
-    return true;
+bool qtokenbucket_consume( qtokenbucket_t* bucket, int tokens )
+{
+	refill_tokens( bucket );
+	if( bucket->tokens < tokens )
+	{
+		return false;
+	}
+	bucket->tokens -= tokens;
+	return true;
 }
 
 /**
@@ -106,30 +111,35 @@ bool qtokenbucket_consume(qtokenbucket_t *bucket, int tokens) {
  *
  * @return estimated milliseconds
  */
-long qtokenbucket_waittime(qtokenbucket_t *bucket, int tokens) {
-    refill_tokens(bucket);
-    if (bucket->tokens >= tokens) {
-        return 0;
-    }
-    int tokens_needed = tokens - (int)bucket->tokens;
-    double estimate_milli = (1000 * tokens_needed) / bucket->tokens_per_sec;
-    estimate_milli += ((1000 * tokens_needed) % bucket->tokens_per_sec) ? 1 : 0;
-    return estimate_milli;
+long qtokenbucket_waittime( qtokenbucket_t* bucket, int tokens )
+{
+	refill_tokens( bucket );
+	if( bucket->tokens >= tokens )
+	{
+		return 0;
+	}
+	int tokens_needed     = tokens - (int)bucket->tokens;
+	double estimate_milli = ( 1000 * tokens_needed ) / bucket->tokens_per_sec;
+	estimate_milli +=
+	   ( ( 1000 * tokens_needed ) % bucket->tokens_per_sec ) ? 1 : 0;
+	return estimate_milli;
 }
 
 #ifndef _DOXYGEN_SKIP
 /**
  * Refill tokens.
  */
-static void refill_tokens(qtokenbucket_t *bucket) {
-    long now = qtime_current_milli();
-    if (bucket->tokens < bucket->max_tokens) {
-        double new_tokens = (now - bucket->last_fill) * 0.001
-                * bucket->tokens_per_sec;
-        bucket->tokens =
-                ((bucket->tokens + new_tokens) < bucket->max_tokens) ?
-                        (bucket->tokens + new_tokens) : bucket->max_tokens;
-    }
-    bucket->last_fill = now;
+static void refill_tokens( qtokenbucket_t* bucket )
+{
+	long now = qtime_current_milli( );
+	if( bucket->tokens < bucket->max_tokens )
+	{
+		double new_tokens =
+		   ( now - bucket->last_fill ) * 0.001 * bucket->tokens_per_sec;
+		bucket->tokens = ( ( bucket->tokens + new_tokens ) < bucket->max_tokens )
+		   ? ( bucket->tokens + new_tokens )
+		   : bucket->max_tokens;
+	}
+	bucket->last_fill = now;
 }
 #endif // _DOXYGEN_SKIP

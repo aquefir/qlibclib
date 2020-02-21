@@ -51,9 +51,10 @@
  *
  * @return a pointer of environment variable
  */
-const char *qgetenv(const char *envname, const char *defstr) {
-    const char *envstr = getenv(envname);
-    return (envstr) ? envstr : defstr;
+const char* qgetenv( const char* envname, const char* defstr )
+{
+	const char* envstr = getenv( envname );
+	return ( envstr ) ? envstr : defstr;
 }
 
 /**
@@ -68,15 +69,15 @@ const char *qgetenv(const char *envname, const char *defstr) {
  *  If the command does not report result but it is executed successfully,
  *  this will returns empty string(not null)
  */
-char *qsyscmd(const char *cmd) {
-    FILE *fp = popen(cmd, "r");
-    if (fp == NULL)
-        return NULL;
-    char *str = qfile_read(fp, NULL);
-    pclose(fp);
+char* qsyscmd( const char* cmd )
+{
+	FILE* fp = popen( cmd, "r" );
+	if( fp == NULL )
+		return NULL;
+	char* str = qfile_read( fp, NULL );
+	pclose( fp );
 
-    if (str == NULL)
-        str = strdup("");
-    return str;
+	if( str == NULL )
+		str = strdup( "" );
+	return str;
 }
-

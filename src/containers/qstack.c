@@ -126,43 +126,46 @@
  *   Available options:
  *   - QSTACK_THREADSAFE - make it thread-safe.
  */
-qstack_t *qstack(int options) {
-    qstack_t *stack = (qstack_t *) malloc(sizeof(qstack_t));
-    if (stack == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
+qstack_t* qstack( int options )
+{
+	qstack_t* stack = (qstack_t*)malloc( sizeof( qstack_t ) );
+	if( stack == NULL )
+	{
+		errno = ENOMEM;
+		return NULL;
+	}
 
-    memset((void *) stack, 0, sizeof(qstack_t));
-    stack->list = qlist(options);
-    if (stack->list == NULL) {
-        free(stack);
-        return NULL;
-    }
+	memset( (void*)stack, 0, sizeof( qstack_t ) );
+	stack->list = qlist( options );
+	if( stack->list == NULL )
+	{
+		free( stack );
+		return NULL;
+	}
 
-    // methods
-    stack->setsize = qstack_setsize;
+	// methods
+	stack->setsize = qstack_setsize;
 
-    stack->push = qstack_push;
-    stack->pushstr = qstack_pushstr;
-    stack->pushint = qstack_pushint;
+	stack->push    = qstack_push;
+	stack->pushstr = qstack_pushstr;
+	stack->pushint = qstack_pushint;
 
-    stack->pop = qstack_pop;
-    stack->popstr = qstack_popstr;
-    stack->popint = qstack_popint;
-    stack->popat = qstack_popat;
+	stack->pop    = qstack_pop;
+	stack->popstr = qstack_popstr;
+	stack->popint = qstack_popint;
+	stack->popat  = qstack_popat;
 
-    stack->get = qstack_get;
-    stack->getstr = qstack_getstr;
-    stack->getint = qstack_getint;
-    stack->getat = qstack_getat;
+	stack->get    = qstack_get;
+	stack->getstr = qstack_getstr;
+	stack->getint = qstack_getint;
+	stack->getat  = qstack_getat;
 
-    stack->size = qstack_size;
-    stack->clear = qstack_clear;
-    stack->debug = qstack_debug;
-    stack->free = qstack_free;
+	stack->size  = qstack_size;
+	stack->clear = qstack_clear;
+	stack->debug = qstack_debug;
+	stack->free  = qstack_free;
 
-    return stack;
+	return stack;
 }
 
 /**
@@ -174,8 +177,9 @@ qstack_t *qstack(int options) {
  *
  * @return previous maximum number.
  */
-size_t qstack_setsize(qstack_t *stack, size_t max) {
-    return stack->list->setsize(stack->list, max);
+size_t qstack_setsize( qstack_t* stack, size_t max )
+{
+	return stack->list->setsize( stack->list, max );
 }
 
 /**
@@ -192,8 +196,9 @@ size_t qstack_setsize(qstack_t *stack, size_t max) {
  *                limited number of elements)
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qstack_push(qstack_t *stack, const void *data, size_t size) {
-    return stack->list->addfirst(stack->list, data, size);
+bool qstack_push( qstack_t* stack, const void* data, size_t size )
+{
+	return stack->list->addfirst( stack->list, data, size );
 }
 
 /**
@@ -210,12 +215,14 @@ bool qstack_push(qstack_t *stack, const void *data, size_t size) {
  *                limited number of elements.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qstack_pushstr(qstack_t *stack, const char *str) {
-    if (str == NULL) {
-        errno = EINVAL;
-        return false;
-    }
-    return stack->list->addfirst(stack->list, str, strlen(str) + 1);
+bool qstack_pushstr( qstack_t* stack, const char* str )
+{
+	if( str == NULL )
+	{
+		errno = EINVAL;
+		return false;
+	}
+	return stack->list->addfirst( stack->list, str, strlen( str ) + 1 );
 }
 
 /**
@@ -230,8 +237,9 @@ bool qstack_pushstr(qstack_t *stack, const char *str) {
  *                limited number of elements.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qstack_pushint(qstack_t *stack, int64_t num) {
-    return stack->list->addfirst(stack->list, &num, sizeof(num));
+bool qstack_pushint( qstack_t* stack, int64_t num )
+{
+	return stack->list->addfirst( stack->list, &num, sizeof( num ) );
 }
 
 /**
@@ -246,8 +254,9 @@ bool qstack_pushint(qstack_t *stack, int64_t num) {
  *  - ENOENT    : Stack is empty.
  *  - ENOMEM    : Memory allocation failure.
  */
-void *qstack_pop(qstack_t *stack, size_t *size) {
-    return stack->list->popfirst(stack->list, size);
+void* qstack_pop( qstack_t* stack, size_t* size )
+{
+	return stack->list->popfirst( stack->list, size );
 }
 
 /**
@@ -264,14 +273,16 @@ void *qstack_pop(qstack_t *stack, size_t *size) {
  * @note
  * The string element should be pushed through pushstr().
  */
-char *qstack_popstr(qstack_t *stack) {
-    size_t strsize;
-    char *str = stack->list->popfirst(stack->list, &strsize);
-    if (str != NULL) {
-        str[strsize - 1] = '\0';  // just to make sure
-    }
+char* qstack_popstr( qstack_t* stack )
+{
+	size_t strsize;
+	char* str = stack->list->popfirst( stack->list, &strsize );
+	if( str != NULL )
+	{
+		str[strsize - 1] = '\0'; // just to make sure
+	}
 
-    return str;
+	return str;
 }
 
 /**
@@ -288,15 +299,17 @@ char *qstack_popstr(qstack_t *stack) {
  * @note
  * The integer element should be pushed through pushint().
  */
-int64_t qstack_popint(qstack_t *stack) {
-    int64_t num = 0;
-    int64_t *pnum = stack->list->popfirst(stack->list, NULL);
-    if (pnum != NULL) {
-        num = *pnum;
-        free(pnum);
-    }
+int64_t qstack_popint( qstack_t* stack )
+{
+	int64_t num   = 0;
+	int64_t* pnum = stack->list->popfirst( stack->list, NULL );
+	if( pnum != NULL )
+	{
+		num = *pnum;
+		free( pnum );
+	}
 
-    return num;
+	return num;
 }
 
 /**
@@ -317,8 +330,9 @@ int64_t qstack_popint(qstack_t *stack) {
  *  this stack. For example, index -1 will always pop a element which is pushed
  *  at very first time.
  */
-void *qstack_popat(qstack_t *stack, int index, size_t *size) {
-    return stack->list->popat(stack->list, index, size);
+void* qstack_popat( qstack_t* stack, int index, size_t* size )
+{
+	return stack->list->popat( stack->list, index, size );
 }
 
 /**
@@ -334,8 +348,9 @@ void *qstack_popat(qstack_t *stack, int index, size_t *size) {
  *
  * @return a pointer of malloced element, otherwise returns NULL.
  */
-void *qstack_get(qstack_t *stack, size_t *size, bool newmem) {
-    return stack->list->getfirst(stack->list, size, newmem);
+void* qstack_get( qstack_t* stack, size_t* size, bool newmem )
+{
+	return stack->list->getfirst( stack->list, size, newmem );
 }
 
 /**
@@ -352,14 +367,16 @@ void *qstack_get(qstack_t *stack, size_t *size, bool newmem) {
  * @note
  * The string element should be pushed through pushstr().
  */
-char *qstack_getstr(qstack_t *stack) {
-    size_t strsize;
-    char *str = stack->list->getfirst(stack->list, &strsize, true);
-    if (str != NULL) {
-        str[strsize - 1] = '\0';  // just to make sure
-    }
+char* qstack_getstr( qstack_t* stack )
+{
+	size_t strsize;
+	char* str = stack->list->getfirst( stack->list, &strsize, true );
+	if( str != NULL )
+	{
+		str[strsize - 1] = '\0'; // just to make sure
+	}
 
-    return str;
+	return str;
 }
 
 /**
@@ -376,15 +393,17 @@ char *qstack_getstr(qstack_t *stack) {
  * @note
  * The integer element should be pushed through pushint().
  */
-int64_t qstack_getint(qstack_t *stack) {
-    int64_t num = 0;
-    int64_t *pnum = stack->list->getfirst(stack->list, NULL, true);
-    if (pnum != NULL) {
-        num = *pnum;
-        free(pnum);
-    }
+int64_t qstack_getint( qstack_t* stack )
+{
+	int64_t num   = 0;
+	int64_t* pnum = stack->list->getfirst( stack->list, NULL, true );
+	if( pnum != NULL )
+	{
+		num = *pnum;
+		free( pnum );
+	}
 
-    return num;
+	return num;
 }
 
 /**
@@ -406,8 +425,9 @@ int64_t qstack_getint(qstack_t *stack) {
  * stack. For example, index -1 will always get a element which is pushed at
  * very first time.
  */
-void *qstack_getat(qstack_t *stack, int index, size_t *size, bool newmem) {
-    return stack->list->getat(stack->list, index, size, newmem);
+void* qstack_getat( qstack_t* stack, int index, size_t* size, bool newmem )
+{
+	return stack->list->getat( stack->list, index, size, newmem );
 }
 
 /**
@@ -417,8 +437,9 @@ void *qstack_getat(qstack_t *stack, int index, size_t *size, bool newmem) {
  *
  * @return the number of elements in this stack.
  */
-size_t qstack_size(qstack_t *stack) {
-    return stack->list->size(stack->list);
+size_t qstack_size( qstack_t* stack )
+{
+	return stack->list->size( stack->list );
 }
 
 /**
@@ -426,9 +447,7 @@ size_t qstack_size(qstack_t *stack) {
  *
  * @param stack qstack container pointer.
  */
-void qstack_clear(qstack_t *stack) {
-    stack->list->clear(stack->list);
-}
+void qstack_clear( qstack_t* stack ) { stack->list->clear( stack->list ); }
 
 /**
  * qstack->debug(): Print out stored elements for debugging purpose.
@@ -438,8 +457,9 @@ void qstack_clear(qstack_t *stack) {
  *
  * @return true if successful, otherwise returns false.
  */
-bool qstack_debug(qstack_t *stack, FILE *out) {
-    return stack->list->debug(stack->list, out);
+bool qstack_debug( qstack_t* stack, FILE* out )
+{
+	return stack->list->debug( stack->list, out );
 }
 
 /**
@@ -449,7 +469,8 @@ bool qstack_debug(qstack_t *stack, FILE *out) {
  *
  * @return always returns true.
  */
-void qstack_free(qstack_t *stack) {
-    stack->list->free(stack->list);
-    free(stack);
+void qstack_free( qstack_t* stack )
+{
+	stack->list->free( stack->list );
+	free( stack );
 }

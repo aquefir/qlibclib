@@ -86,8 +86,8 @@
 
 #ifndef _DOXGEN_SKIP
 
-static void *get_at(qvector_t *vector, int index, bool newmem);
-static bool remove_at(qvector_t *vector, int index);
+static void* get_at( qvector_t* vector, int index, bool newmem );
+static bool remove_at( qvector_t* vector, int index );
 
 #endif
 
@@ -114,98 +114,115 @@ static bool remove_at(qvector_t *vector, int index);
  *  - QVECTOR_RESIZE_LINEAR - add the size with initial num when vector is full
  *  - QVECTOR_RESIZE_EXACT - add up as much as needed
  */
-qvector_t *qvector(size_t max, size_t objsize, int options) {
-    if (objsize == 0) {
-        errno = EINVAL;
-        return NULL;
-    }
+qvector_t* qvector( size_t max, size_t objsize, int options )
+{
+	if( objsize == 0 )
+	{
+		errno = EINVAL;
+		return NULL;
+	}
 
-    qvector_t *vector = (qvector_t *)calloc(1, sizeof(qvector_t));
-    if (vector == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
+	qvector_t* vector = (qvector_t*)calloc( 1, sizeof( qvector_t ) );
+	if( vector == NULL )
+	{
+		errno = ENOMEM;
+		return NULL;
+	}
 
-    if (max == 0) {
-        vector->data = NULL;
-        vector->num = 0;
-        vector->max = 0;
-        vector->objsize = objsize;
-    } else {
-        void *data = malloc(max * objsize);
-        if(data == NULL) {
-            free(vector);
-            errno = ENOMEM;
-            return NULL;
-        }
+	if( max == 0 )
+	{
+		vector->data    = NULL;
+		vector->num     = 0;
+		vector->max     = 0;
+		vector->objsize = objsize;
+	}
+	else
+	{
+		void* data = malloc( max * objsize );
+		if( data == NULL )
+		{
+			free( vector );
+			errno = ENOMEM;
+			return NULL;
+		}
 
-        vector->data = data;
-        vector->num = 0;
-        vector->objsize = objsize;
-        vector->max = max;
-    }
+		vector->data    = data;
+		vector->num     = 0;
+		vector->objsize = objsize;
+		vector->max     = max;
+	}
 
-    //handle options
-    if (options & QVECTOR_THREADSAFE) {
-        Q_MUTEX_NEW(vector->qmutex, true);
-        if(vector->qmutex == NULL) {
-            free(vector);
-            errno = ENOMEM;
-            return NULL;
-        }
-    }
+	// handle options
+	if( options & QVECTOR_THREADSAFE )
+	{
+		Q_MUTEX_NEW( vector->qmutex, true );
+		if( vector->qmutex == NULL )
+		{
+			free( vector );
+			errno = ENOMEM;
+			return NULL;
+		}
+	}
 
-    vector->options = 0;
-    if (options & QVECTOR_RESIZE_DOUBLE) {
-        vector->options |= QVECTOR_RESIZE_DOUBLE;
-    } else if (options & QVECTOR_RESIZE_LINEAR) {
-        vector->options |= QVECTOR_RESIZE_LINEAR;
-        if (max == 0) {
-            vector->initnum = 1;
-        } else {
-            vector->initnum = max;
-        }
-    } else {
-        vector->options |= QVECTOR_RESIZE_EXACT;
-    }
+	vector->options = 0;
+	if( options & QVECTOR_RESIZE_DOUBLE )
+	{
+		vector->options |= QVECTOR_RESIZE_DOUBLE;
+	}
+	else if( options & QVECTOR_RESIZE_LINEAR )
+	{
+		vector->options |= QVECTOR_RESIZE_LINEAR;
+		if( max == 0 )
+		{
+			vector->initnum = 1;
+		}
+		else
+		{
+			vector->initnum = max;
+		}
+	}
+	else
+	{
+		vector->options |= QVECTOR_RESIZE_EXACT;
+	}
 
-    //member methods
-    vector->addfirst = qvector_addfirst;
-    vector->addlast = qvector_addlast;
-    vector->addat = qvector_addat;
+	// member methods
+	vector->addfirst = qvector_addfirst;
+	vector->addlast  = qvector_addlast;
+	vector->addat    = qvector_addat;
 
-    vector->getfirst = qvector_getfirst;
-    vector->getlast = qvector_getlast;
-    vector->getat = qvector_getat;
-  
-    vector->setfirst = qvector_setfirst;
-    vector->setlast = qvector_setlast;
-    vector->setat = qvector_setat;
+	vector->getfirst = qvector_getfirst;
+	vector->getlast  = qvector_getlast;
+	vector->getat    = qvector_getat;
 
-    vector->popfirst = qvector_popfirst;
-    vector->poplast = qvector_poplast;
-    vector->popat = qvector_popat;
+	vector->setfirst = qvector_setfirst;
+	vector->setlast  = qvector_setlast;
+	vector->setat    = qvector_setat;
 
-    vector->removefirst = qvector_removefirst;
-    vector->removelast = qvector_removelast;
-    vector->removeat = qvector_removeat;
+	vector->popfirst = qvector_popfirst;
+	vector->poplast  = qvector_poplast;
+	vector->popat    = qvector_popat;
 
-    vector->size = qvector_size;
-    vector->resize = qvector_resize;
+	vector->removefirst = qvector_removefirst;
+	vector->removelast  = qvector_removelast;
+	vector->removeat    = qvector_removeat;
 
-    vector->toarray = qvector_toarray;
+	vector->size   = qvector_size;
+	vector->resize = qvector_resize;
 
-    vector->lock = qvector_lock;
-    vector->unlock = qvector_unlock;
+	vector->toarray = qvector_toarray;
 
-    vector->clear = qvector_clear;
-    vector->debug = qvector_debug;
-    vector->free = qvector_free;
+	vector->lock   = qvector_lock;
+	vector->unlock = qvector_unlock;
 
-    vector->reverse = qvector_reverse;
-    vector->getnext = qvector_getnext;
+	vector->clear = qvector_clear;
+	vector->debug = qvector_debug;
+	vector->free  = qvector_free;
 
-    return vector;
+	vector->reverse = qvector_reverse;
+	vector->getnext = qvector_getnext;
+
+	return vector;
 }
 
 /**
@@ -227,11 +244,12 @@ qvector_t *qvector(size_t max, size_t objsize, int options) {
  *  //create a vector and add the sample object.
  *  qvector_t *vector = qvector(0, 1, sizeof(struct my_obj));
  *  vector->addfirst(vector, &obj);
- * 
+ *
  * @endcode
  */
-bool qvector_addfirst(qvector_t *vector, const void *data) {
-    return vector->addat(vector, 0, data);
+bool qvector_addfirst( qvector_t* vector, const void* data )
+{
+	return vector->addat( vector, 0, data );
 }
 
 /**
@@ -253,11 +271,12 @@ bool qvector_addfirst(qvector_t *vector, const void *data) {
  *  //create a vector and add the sample object.
  *  qvector_t *vector = qvector(0, 1, sizeof(struct my_obj));
  *  vector->addlast(vector, &obj);
- * 
+ *
  * @endcode
  */
-bool qvector_addlast(qvector_t *vector, const void *data) {
-    return vector->addat(vector, vector->num, data);
+bool qvector_addlast( qvector_t* vector, const void* data )
+{
+	return vector->addat( vector, vector->num, data );
 }
 
 /**
@@ -267,7 +286,7 @@ bool qvector_addlast(qvector_t *vector, const void *data) {
  * @param vector    qvector_t container pointer
  * @param index     index at which the specified element is to be inserted
  * @param data      a pointer which points data memory
- * 
+ *
  * @return true if successful, otherwise returns false.
  * @retval errno will be set in errno condition.
  *
@@ -279,11 +298,11 @@ bool qvector_addlast(qvector_t *vector, const void *data) {
  *                     first     last      new
  *  Array              [ A ][ B ][ C ]?==?[   ]
  *  (positive index)     0    1    2        3
- *  (negative index)    -3   -2   -1     
+ *  (negative index)    -3   -2   -1
  *
  * @encode
  *
- * @code 
+ * @code
  *  qvector_t *vector = qvector();
  *  vector->addat(vector, 0, &data); //same as addfirst().
  *  vector->addat(vector, 0, &data); //same as addlast().
@@ -293,58 +312,69 @@ bool qvector_addlast(qvector_t *vector, const void *data) {
  * @note
  *  Index starts from 0.
  */
-bool qvector_addat(qvector_t *vector, int index, const void *data) {
-    //check arguments
-    if (data == NULL) {
-        errno = EINVAL;
-        return false;
-    }
+bool qvector_addat( qvector_t* vector, int index, const void* data )
+{
+	// check arguments
+	if( data == NULL )
+	{
+		errno = EINVAL;
+		return false;
+	}
 
-    //check index
-    if (index < 0) {
-        index += vector->num;
-    }
-    if (index > vector->num) {
-        errno = ERANGE;
-        return false;
-    }
+	// check index
+	if( index < 0 )
+	{
+		index += vector->num;
+	}
+	if( index > vector->num )
+	{
+		errno = ERANGE;
+		return false;
+	}
 
-    vector->lock(vector);
+	vector->lock( vector );
 
-    //check whether the vector is full
-    if (vector->num >= vector->max) {
-        size_t newmax = vector->max + 1;
-        if (vector->options & QVECTOR_RESIZE_DOUBLE) {
-            newmax = (vector->max + 1) * 2;
-        } else if (vector->options & QVECTOR_RESIZE_LINEAR) {
-            newmax = vector->max + vector->initnum;
-        } else {
-            newmax = vector->max + 1;
-        }
-        bool result = vector->resize(vector, newmax);
-        if(result == false)
-        {
-            vector->unlock(vector);
-            errno = ENOMEM;
-            return false;
-        }
-    }
+	// check whether the vector is full
+	if( vector->num >= vector->max )
+	{
+		size_t newmax = vector->max + 1;
+		if( vector->options & QVECTOR_RESIZE_DOUBLE )
+		{
+			newmax = ( vector->max + 1 ) * 2;
+		}
+		else if( vector->options & QVECTOR_RESIZE_LINEAR )
+		{
+			newmax = vector->max + vector->initnum;
+		}
+		else
+		{
+			newmax = vector->max + 1;
+		}
+		bool result = vector->resize( vector, newmax );
+		if( result == false )
+		{
+			vector->unlock( vector );
+			errno = ENOMEM;
+			return false;
+		}
+	}
 
-    //shift data from index...(num - 1)  to index + 1...num
-    int i;
-    for (i = vector->num; i > index; i--) {
-        void *dst = (unsigned char *)vector->data + vector->objsize * i;
-        void *src = (unsigned char *)vector->data + vector->objsize * (i - 1);
+	// shift data from index...(num - 1)  to index + 1...num
+	int i;
+	for( i = vector->num; i > index; i-- )
+	{
+		void* dst = (unsigned char*)vector->data + vector->objsize * i;
+		void* src = (unsigned char*)vector->data + vector->objsize * ( i - 1 );
 
-        memcpy(dst, src, vector->objsize);
-    }
+		memcpy( dst, src, vector->objsize );
+	}
 
-    void *add = (unsigned char *)vector->data + index * vector->objsize;
-    memcpy(add, data, vector->objsize);
-    vector->num++;    
+	void* add = (unsigned char*)vector->data + index * vector->objsize;
+	memcpy( add, data, vector->objsize );
+	vector->num++;
 
-    vector->unlock(vector);
-    return true;
+	vector->unlock( vector );
+	return true;
 }
 
 /**
@@ -368,8 +398,9 @@ bool qvector_addat(qvector_t *vector, int index, const void *data) {
  *
  * @endcode
  */
-void *qvector_getfirst(qvector_t *vector, bool newmem) {
-    return vector->getat(vector, 0, newmem);
+void* qvector_getfirst( qvector_t* vector, bool newmem )
+{
+	return vector->getat( vector, 0, newmem );
 }
 
 /**
@@ -383,7 +414,7 @@ void *qvector_getfirst(qvector_t *vector, bool newmem) {
  *  - ENOENT : Vector is empty.
  *  - ENOMEM : Memory alocation failure.
  *
- * @code 
+ * @code
  *  void *data = vector->getlast(vector, true);
  *  if (data != NULL) {
  *      (...omit...)
@@ -392,8 +423,9 @@ void *qvector_getfirst(qvector_t *vector, bool newmem) {
  *
  * @endcode
  */
-void *qvector_getlast(qvector_t *vector, bool newmem) {
-    return vector->getat(vector, -1, newmem);
+void* qvector_getlast( qvector_t* vector, bool newmem )
+{
+	return vector->getat( vector, -1, newmem );
 }
 
 /**
@@ -420,16 +452,17 @@ void *qvector_getlast(qvector_t *vector, bool newmem) {
  * @note
  *  Index starts from 0.
  */
-void *qvector_getat(qvector_t *vector, int index, bool newmem) {
-    vector->lock(vector);
-    void *data = get_at(vector, index, newmem);
-    vector->unlock(vector);
+void* qvector_getat( qvector_t* vector, int index, bool newmem )
+{
+	vector->lock( vector );
+	void* data = get_at( vector, index, newmem );
+	vector->unlock( vector );
 
-    return data;
+	return data;
 }
 
 /**
- * qvector->setfirst(): Set the first element with a new value in this 
+ * qvector->setfirst(): Set the first element with a new value in this
  * vector.
  *
  * @param vector    qvector_t container pointer.
@@ -449,12 +482,13 @@ void *qvector_getat(qvector_t *vector, int index, bool newmem) {
  *
  * @endcode
  */
-bool qvector_setfirst(qvector_t *vector, const void *data) {
-    return vector->setat(vector, 0, data);
+bool qvector_setfirst( qvector_t* vector, const void* data )
+{
+	return vector->setat( vector, 0, data );
 }
 
 /**
- * qvector->setlast(): Set the last element with a new value in this 
+ * qvector->setlast(): Set the last element with a new value in this
  * vector.
  *
  * @param vector    qvector_t container pointer.
@@ -474,12 +508,13 @@ bool qvector_setfirst(qvector_t *vector, const void *data) {
  *
  * @endcode
  */
-bool qvector_setlast(qvector_t *vector, const void *data) {
-    return vector->setat(vector, -1, data);
+bool qvector_setlast( qvector_t* vector, const void* data )
+{
+	return vector->setat( vector, -1, data );
 }
 
 /**
- * qvector->setat(): Set new value to the specified position in this 
+ * qvector->setat(): Set new value to the specified position in this
  * vector.
  *
  * @param vector    qvector_t container pointer
@@ -500,30 +535,33 @@ bool qvector_setlast(qvector_t *vector, const void *data) {
  *
  * @endcode
  */
-bool qvector_setat(qvector_t *vector, int index, const void *data) {
-    vector->lock(vector);
-    void *old_data = get_at(vector, index, false);
-    if (old_data == NULL) {
-        return false;
-    }
-    memcpy(old_data, data, vector->objsize);
-    vector->unlock(vector);
-   
-    return true;
+bool qvector_setat( qvector_t* vector, int index, const void* data )
+{
+	vector->lock( vector );
+	void* old_data = get_at( vector, index, false );
+	if( old_data == NULL )
+	{
+		return false;
+	}
+	memcpy( old_data, data, vector->objsize );
+	vector->unlock( vector );
+
+	return true;
 }
 
 /**
  * qvector->popfirst(): Returns and remove the first element in this vector.
  *
  * @param vector    qvector_t container pointer.
- * 
+ *
  * @return a pointer of malloced element, otherwise returns NULL.
  * @retval errno will be set in error condition.
  *  - ENOENT : Vector is empty.
  *  - ENOMEM : Memory allocation failure.
  */
-void *qvector_popfirst(qvector_t *vector) {
-    return vector->popat(vector, 0);
+void* qvector_popfirst( qvector_t* vector )
+{
+	return vector->popat( vector, 0 );
 }
 
 /**
@@ -536,8 +574,9 @@ void *qvector_popfirst(qvector_t *vector) {
  *  - ENOENT : Vector is empty.
  *  - ENOMEM : Memeory allocation failure.
  */
-void *qvector_poplast(qvector_t *vector) {
-    return vector->popat(vector, -1);
+void* qvector_poplast( qvector_t* vector )
+{
+	return vector->popat( vector, -1 );
 }
 
 /**
@@ -564,37 +603,41 @@ void *qvector_poplast(qvector_t *vector) {
  * @note
  *  Index starts from 0.
  */
-void *qvector_popat(qvector_t *vector, int index) {
-    vector->lock(vector);
-    void *data = get_at(vector, index, true);
-    if (data == NULL) {
-        return NULL;
-    }
+void* qvector_popat( qvector_t* vector, int index )
+{
+	vector->lock( vector );
+	void* data = get_at( vector, index, true );
+	if( data == NULL )
+	{
+		return NULL;
+	}
 
-    bool result = remove_at(vector, index);
-    if (result == false) {
-        free(data);
-        vector->unlock(vector);
-        return NULL;
-    }
-    vector->num--;
+	bool result = remove_at( vector, index );
+	if( result == false )
+	{
+		free( data );
+		vector->unlock( vector );
+		return NULL;
+	}
+	vector->num--;
 
-    vector->unlock(vector);
-    return data;
+	vector->unlock( vector );
+	return data;
 }
 
 /**
  * qvector->removefirst(): Removes the first element in this vector.
  *
  * @param vector    qvector_t container pointer.
- * 
+ *
  * @return true, otherwise returns false.
  * @retval errno will be set in error condition.
  * - ENOENT : Vector is empty.
  * - ERANGE : Index out of range.
  */
-bool qvector_removefirst(qvector_t *vector) {
-    return vector->removeat(vector, 0);
+bool qvector_removefirst( qvector_t* vector )
+{
+	return vector->removeat( vector, 0 );
 }
 
 /**
@@ -607,12 +650,14 @@ bool qvector_removefirst(qvector_t *vector) {
  *  - ENOENT : Vector is empty.
  *  - ERANGE : Index out of range.
  */
-bool qvector_removelast(qvector_t *vector) {
-    return vector->removeat(vector, -1);
+bool qvector_removelast( qvector_t* vector )
+{
+	return vector->removeat( vector, -1 );
 }
 
 /**
- * qvector->removeat(): Removes the element at the specified position in this vector.
+ * qvector->removeat(): Removes the element at the specified position in this
+ * vector.
  *
  * @param vector    qvector_t container pointer.
  * @param index     index at which the specified element is to be removed.
@@ -622,16 +667,18 @@ bool qvector_removelast(qvector_t *vector) {
  *  - ENOENT : Vector is empty.
  *  - ERANGE : Index out of range.
  */
-bool qvector_removeat(qvector_t *vector, int index) {
-    vector->lock(vector);
-    bool result = remove_at(vector, index);
-    if (result) {
-        vector->num--;
-    }
+bool qvector_removeat( qvector_t* vector, int index )
+{
+	vector->lock( vector );
+	bool result = remove_at( vector, index );
+	if( result )
+	{
+		vector->num--;
+	}
 
-    vector->unlock(vector);
+	vector->unlock( vector );
 
-    return result;
+	return result;
 }
 
 /**
@@ -641,9 +688,7 @@ bool qvector_removeat(qvector_t *vector, int index) {
  *
  * @return the number of elements in this vector.
  */
-size_t qvector_size(qvector_t *vector) {
-    return vector->num;
-}
+size_t qvector_size( qvector_t* vector ) { return vector->num; }
 
 /**
  * qvector->lock(): Enters critical section.
@@ -654,32 +699,29 @@ size_t qvector_size(qvector_t *vector) {
  *  From user side, normally locking operation is only needed when traverse all
  *  elements using qvector->getnext().
  */
-void qvector_lock(qvector_t *vector) {
-    Q_MUTEX_ENTER(vector->qmutex);
-}
+void qvector_lock( qvector_t* vector ) { Q_MUTEX_ENTER( vector->qmutex ); }
 
 /**
  * qvector->unlock(): Leaves critical section.
  *
  * @param vector    qvector_t container pointer.
  */
-void qvector_unlock(qvector_t *vector) {
-    Q_MUTEX_LEAVE(vector->qmutex);
-}
+void qvector_unlock( qvector_t* vector ) { Q_MUTEX_LEAVE( vector->qmutex ); }
 
 /**
  * qvector->clear(): Remove all the elemnts in this vector.
  *
  * @param vector    qvector_t container pointer.
  */
-void qvector_clear(qvector_t *vector) {
-    vector->lock(vector);
-    free(vector->data);
-    vector->data = NULL;
-    vector->num = 0;
-    vector->objsize = 0;
-    vector->max = 0;
-    vector->unlock(vector);
+void qvector_clear( qvector_t* vector )
+{
+	vector->lock( vector );
+	free( vector->data );
+	vector->data    = NULL;
+	vector->num     = 0;
+	vector->objsize = 0;
+	vector->max     = 0;
+	vector->unlock( vector );
 }
 
 /**
@@ -687,11 +729,12 @@ void qvector_clear(qvector_t *vector) {
  *
  * @param vector    qvector_t container pointer.
  */
-void qvector_free(qvector_t *vector) {
-    vector->clear(vector);
-    Q_MUTEX_DESTROY(vector->qmutex);
+void qvector_free( qvector_t* vector )
+{
+	vector->clear( vector );
+	Q_MUTEX_DESTROY( vector->qmutex );
 
-    free(vector);
+	free( vector );
 }
 
 /**
@@ -704,23 +747,26 @@ void qvector_free(qvector_t *vector) {
  * @retval errno will be set in error condition.
  *  - EIO : Invalid output stream.
  */
-bool qvector_debug(qvector_t *vector, FILE *out) {
-    if (out == NULL) {
-        errno = EIO;
-        return false;
-    }
+bool qvector_debug( qvector_t* vector, FILE* out )
+{
+	if( out == NULL )
+	{
+		errno = EIO;
+		return false;
+	}
 
-    vector->lock(vector);
-    int i;
-    for (i = 0; i < vector->num; i++) {
-        void *data = (unsigned char  *)vector->data + i * vector->objsize;
-        fprintf(out, "%d=", i);
-        _q_textout(out, data, vector->objsize, MAX_HUMANOUT);
-        fprintf(out, " (%zu)\n", vector->objsize);
-    }
-    vector->unlock(vector);
-    
-    return true;
+	vector->lock( vector );
+	int i;
+	for( i = 0; i < vector->num; i++ )
+	{
+		void* data = (unsigned char*)vector->data + i * vector->objsize;
+		fprintf( out, "%d=", i );
+		_q_textout( out, data, vector->objsize, MAX_HUMANOUT );
+		fprintf( out, " (%zu)\n", vector->objsize );
+	}
+	vector->unlock( vector );
+
+	return true;
 }
 
 /**
@@ -743,39 +789,44 @@ bool qvector_debug(qvector_t *vector, FILE *out) {
  *
  * @endcode
  */
-bool qvector_resize(qvector_t *vector, size_t newmax) {
-    vector->lock(vector);
+bool qvector_resize( qvector_t* vector, size_t newmax )
+{
+	vector->lock( vector );
 
-    if (newmax == 0) {
-        free(vector->data);
-        vector->data = NULL;
-        vector->max = 0;
-        vector->num = 0;
-        vector->objsize = 0;
+	if( newmax == 0 )
+	{
+		free( vector->data );
+		vector->data    = NULL;
+		vector->max     = 0;
+		vector->num     = 0;
+		vector->objsize = 0;
 
-        vector->unlock(vector);
-        return true;
-    }
-   
-    void *newdata = realloc(vector->data, newmax * vector->objsize);
-    if (newdata == NULL) {
-        errno = ENOMEM;
-        vector->unlock(vector);
-        return false;
-    }
+		vector->unlock( vector );
+		return true;
+	}
 
-    vector->data = newdata;
-    vector->max = newmax;
-    if (vector->num > newmax) {
-        vector->num = newmax;
-    }
-    
-    vector->unlock(vector);
-    return true;
+	void* newdata = realloc( vector->data, newmax * vector->objsize );
+	if( newdata == NULL )
+	{
+		errno = ENOMEM;
+		vector->unlock( vector );
+		return false;
+	}
+
+	vector->data = newdata;
+	vector->max  = newmax;
+	if( vector->num > newmax )
+	{
+		vector->num = newmax;
+	}
+
+	vector->unlock( vector );
+	return true;
 }
 
 /**
- * qvector->toarray(): Returns an array contains all the elements in this vector.
+ * qvector->toarray(): Returns an array contains all the elements in this
+ * vector.
  * @param vector    qvector_t container pointer.
  * @param size      if size is not NULL, the number of elements will be stored.
  *
@@ -784,32 +835,37 @@ bool qvector_resize(qvector_t *vector, size_t newmax) {
  *  - ENOENT : Vector is empty.
  *  - ENOMEM : Memory allocation failure.
  */
-void *qvector_toarray(qvector_t *vector, size_t *size) {
-    if (vector->num <= 0) {
-        if (size != NULL) {
-            *size = 0;
-        }
-        errno = ENOENT;
-        return NULL;
-    }
+void* qvector_toarray( qvector_t* vector, size_t* size )
+{
+	if( vector->num <= 0 )
+	{
+		if( size != NULL )
+		{
+			*size = 0;
+		}
+		errno = ENOENT;
+		return NULL;
+	}
 
-    vector->lock(vector);
-    
-    void *array = malloc(vector->num * vector->objsize);
-    if (array == NULL) {
-        vector->unlock(vector);
-        errno = ENOMEM;
-        return NULL;
-    }
-   
-    memcpy(array, vector->data, vector->num * vector->objsize);
-    
-    if (size != NULL) {
-        *size = vector->num;
-    }
+	vector->lock( vector );
 
-    vector->unlock(vector);
-    return array;
+	void* array = malloc( vector->num * vector->objsize );
+	if( array == NULL )
+	{
+		vector->unlock( vector );
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	memcpy( array, vector->data, vector->num * vector->objsize );
+
+	if( size != NULL )
+	{
+		*size = vector->num;
+	}
+
+	vector->unlock( vector );
+	return array;
 }
 
 /**
@@ -820,33 +876,37 @@ void *qvector_toarray(qvector_t *vector, size_t *size) {
  * @retval will be set in error condition.
  *  - ENOMEM : Memory allocations failure.
  */
-void qvector_reverse(qvector_t *vector) {
-    vector->lock(vector);
+void qvector_reverse( qvector_t* vector )
+{
+	vector->lock( vector );
 
-    if (vector->num <= 1) {
-        vector->unlock(vector);
-        return;
-    }
+	if( vector->num <= 1 )
+	{
+		vector->unlock( vector );
+		return;
+	}
 
-    int i;
-    int j;
-    void *tmp = malloc(vector->objsize);
-    if (tmp == NULL) {
-        errno = ENOMEM;
-        return;
-    }
+	int i;
+	int j;
+	void* tmp = malloc( vector->objsize );
+	if( tmp == NULL )
+	{
+		errno = ENOMEM;
+		return;
+	}
 
-    for (i = 0, j = vector->num - 1; i < j; i++, j--) {
-        void *data1 = (unsigned char *)vector->data + i * vector->objsize;
-        void *data2 = (unsigned char *)vector->data + j * vector->objsize;
- 
-        memcpy(tmp, data1, vector->objsize);
-        memcpy(data1, data2, vector->objsize); 
-        memcpy(data2, tmp, vector->objsize);
-    }
-    free(tmp);
+	for( i = 0, j = vector->num - 1; i < j; i++, j-- )
+	{
+		void* data1 = (unsigned char*)vector->data + i * vector->objsize;
+		void* data2 = (unsigned char*)vector->data + j * vector->objsize;
 
-    vector->unlock(vector);
+		memcpy( tmp, data1, vector->objsize );
+		memcpy( data1, data2, vector->objsize );
+		memcpy( data2, tmp, vector->objsize );
+	}
+	free( tmp );
+
+	vector->unlock( vector );
 }
 
 /**
@@ -878,96 +938,120 @@ void qvector_reverse(qvector_t *vector) {
  *  vector->unlock(vector);
  * @endcode
  */
-bool qvector_getnext(qvector_t *vector, qvector_obj_t *obj, bool newmem) {
-    if (obj == NULL) {
-        return false;
-    }
-    vector->lock(vector);
-    
-    if (obj->index >= vector->num) {
-        errno = ENOENT;
-        obj->data = NULL;
-        vector->unlock(vector);
-        return false;
-    }
- 
-    void *data = (unsigned char *)vector->data + (obj->index) * vector->objsize;
-    if (newmem) {
-        void *dump = malloc(vector->objsize);
-        if (dump == NULL ) {
-            errno = ENOMEM;
-            obj->data = NULL;
-            vector->unlock(vector);
-            return false;
-        }
-        memcpy(dump, data, vector->objsize);
-        obj->data = dump;
-    }
-    else
-    {
-        obj->data = data;
-    }
- 
-    obj->index++;
-    vector->unlock(vector);
-    return true;   
+bool qvector_getnext( qvector_t* vector, qvector_obj_t* obj, bool newmem )
+{
+	if( obj == NULL )
+	{
+		return false;
+	}
+	vector->lock( vector );
+
+	if( obj->index >= vector->num )
+	{
+		errno     = ENOENT;
+		obj->data = NULL;
+		vector->unlock( vector );
+		return false;
+	}
+
+	void* data =
+	   (unsigned char*)vector->data + ( obj->index ) * vector->objsize;
+	if( newmem )
+	{
+		void* dump = malloc( vector->objsize );
+		if( dump == NULL )
+		{
+			errno     = ENOMEM;
+			obj->data = NULL;
+			vector->unlock( vector );
+			return false;
+		}
+		memcpy( dump, data, vector->objsize );
+		obj->data = dump;
+	}
+	else
+	{
+		obj->data = data;
+	}
+
+	obj->index++;
+	vector->unlock( vector );
+	return true;
 }
 
 #ifndef _DOXYGEN_SKIP
 
-static void *get_at(qvector_t *vector, int index, bool newmem) {
-    if (index < 0) {
-        index += vector->num;
-    }
-    if (index >= vector->num) {
-        if (vector->num == 0) {
-            errno = ENOENT;
-            return NULL;
-        } else {
-            errno = ERANGE;
-            return NULL;
-        }
-    }
+static void* get_at( qvector_t* vector, int index, bool newmem )
+{
+	if( index < 0 )
+	{
+		index += vector->num;
+	}
+	if( index >= vector->num )
+	{
+		if( vector->num == 0 )
+		{
+			errno = ENOENT;
+			return NULL;
+		}
+		else
+		{
+			errno = ERANGE;
+			return NULL;
+		}
+	}
 
-    void *src_data = (unsigned char *)vector->data + index * vector->objsize;
-    if (newmem) {
-        void *dump_data = malloc(vector->objsize);
-        if (dump_data == NULL) {
-            errno = ENOMEM;
-            return NULL;
-        } else {
-            memcpy(dump_data, src_data, vector->objsize);
-            return dump_data;
-        }
-    } else {
-        return src_data;
-    }
+	void* src_data = (unsigned char*)vector->data + index * vector->objsize;
+	if( newmem )
+	{
+		void* dump_data = malloc( vector->objsize );
+		if( dump_data == NULL )
+		{
+			errno = ENOMEM;
+			return NULL;
+		}
+		else
+		{
+			memcpy( dump_data, src_data, vector->objsize );
+			return dump_data;
+		}
+	}
+	else
+	{
+		return src_data;
+	}
 }
 
-static bool remove_at(qvector_t *vector, int index) {
-    if (index < 0) {
-        index += vector->num;
-    }
-    if (index >= vector->num) {
-        if (vector->num == 0) {
-            errno = ENOENT;
-            return false;
-        } else {
-            errno = ERANGE;
-            return false;
-        }
-    }
+static bool remove_at( qvector_t* vector, int index )
+{
+	if( index < 0 )
+	{
+		index += vector->num;
+	}
+	if( index >= vector->num )
+	{
+		if( vector->num == 0 )
+		{
+			errno = ENOENT;
+			return false;
+		}
+		else
+		{
+			errno = ERANGE;
+			return false;
+		}
+	}
 
-    int i;
-    for (i = index + 1; i < vector->num; i++) {
-        void *src = (unsigned char *)vector->data + i * vector->objsize;
-        void *dst = (unsigned char *)vector->data + (i - 1) * vector->objsize;
+	int i;
+	for( i = index + 1; i < vector->num; i++ )
+	{
+		void* src = (unsigned char*)vector->data + i * vector->objsize;
+		void* dst = (unsigned char*)vector->data + ( i - 1 ) * vector->objsize;
 
-        memcpy(dst, src, vector->objsize);
-    }
+		memcpy( dst, src, vector->objsize );
+	}
 
-    return true;
+	return true;
 }
 
 #endif
-

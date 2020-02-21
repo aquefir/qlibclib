@@ -43,9 +43,9 @@
 extern "C" {
 #endif
 
-extern int64_t qcount_read(const char *filepath);
-extern bool qcount_save(const char *filepath, int64_t number);
-extern int64_t qcount_update(const char *filepath, int64_t number);
+extern int64_t qcount_read( const char* filepath );
+extern bool qcount_save( const char* filepath, int64_t number );
+extern int64_t qcount_update( const char* filepath, int64_t number );
 
 #ifdef __cplusplus
 }

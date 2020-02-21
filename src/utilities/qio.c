@@ -41,7 +41,7 @@
 #include "qinternal.h"
 #include "utilities/qio.h"
 
-#define MAX_IOSEND_SIZE     (32 * 1024)
+#define MAX_IOSEND_SIZE ( 32 * 1024 )
 
 /**
  * Test & wait until the file descriptor has readable data.
@@ -56,23 +56,27 @@
  *  The argument timeoutms can be used to set maximum wait time for a socket
  *  descriptor.
  */
-int qio_wait_readable(int fd, int timeoutms) {
-    struct pollfd fds[1];
+int qio_wait_readable( int fd, int timeoutms )
+{
+	struct pollfd fds[1];
 
-    fds[0].fd = fd;
-    fds[0].events = POLLIN;
+	fds[0].fd     = fd;
+	fds[0].events = POLLIN;
 
-    int pollret = poll(fds, 1, timeoutms);
-    if (pollret == 0) {
-        errno = ETIMEDOUT;
-        return 0;
-    } else if (pollret < 0) {
-        return -1;
-    }
+	int pollret = poll( fds, 1, timeoutms );
+	if( pollret == 0 )
+	{
+		errno = ETIMEDOUT;
+		return 0;
+	}
+	else if( pollret < 0 )
+	{
+		return -1;
+	}
 
-    if (fds[0].revents & POLLIN)
-        return 1;
-    return -1;
+	if( fds[0].revents & POLLIN )
+		return 1;
+	return -1;
 }
 
 /**
@@ -84,23 +88,27 @@ int qio_wait_readable(int fd, int timeoutms) {
  *
  * @return 1 if writable, 0 on timeout, -1 if an error occurred.
  */
-int qio_wait_writable(int fd, int timeoutms) {
-    struct pollfd fds[1];
+int qio_wait_writable( int fd, int timeoutms )
+{
+	struct pollfd fds[1];
 
-    fds[0].fd = fd;
-    fds[0].events = POLLOUT;
+	fds[0].fd     = fd;
+	fds[0].events = POLLOUT;
 
-    int pollret = poll(fds, 1, timeoutms);
-    if (pollret == 0) {
-        errno = ETIMEDOUT;
-        return 0;
-    } else if (pollret < 0) {
-        return -1;
-    }
+	int pollret = poll( fds, 1, timeoutms );
+	if( pollret == 0 )
+	{
+		errno = ETIMEDOUT;
+		return 0;
+	}
+	else if( pollret < 0 )
+	{
+		return -1;
+	}
 
-    if (fds[0].revents & POLLOUT)
-        return 1;
-    return -1;
+	if( fds[0].revents & POLLOUT )
+		return 1;
+	return -1;
 }
 
 /**
@@ -115,32 +123,36 @@ int qio_wait_writable(int fd, int timeoutms) {
  *
  * @return the number of bytes read if successful, 0 on timeout, -1 for error.
  */
-ssize_t qio_read(int fd, void *buf, size_t nbytes, int timeoutms) {
-    if (nbytes == 0)
-        return 0;
+ssize_t qio_read( int fd, void* buf, size_t nbytes, int timeoutms )
+{
+	if( nbytes == 0 )
+		return 0;
 
-    ssize_t total = 0;
-    while (total < nbytes) {
-        if (timeoutms >= 0 && qio_wait_readable(fd, timeoutms) <= 0)
-            break;
+	ssize_t total = 0;
+	while( total < nbytes )
+	{
+		if( timeoutms >= 0 && qio_wait_readable( fd, timeoutms ) <= 0 )
+			break;
 
-        ssize_t rsize = read(fd, buf + total, nbytes - total);
-        if (rsize <= 0) {
-            if (errno == EAGAIN || errno == EINPROGRESS) {
-                // possible with non-block io
-                usleep(1);
-                continue;
-            }
-            break;
-        }
-        total += rsize;
-    }
+		ssize_t rsize = read( fd, buf + total, nbytes - total );
+		if( rsize <= 0 )
+		{
+			if( errno == EAGAIN || errno == EINPROGRESS )
+			{
+				// possible with non-block io
+				usleep( 1 );
+				continue;
+			}
+			break;
+		}
+		total += rsize;
+	}
 
-    if (total > 0)
-        return total;
-    else if (errno == ETIMEDOUT)
-        return 0;
-    return -1;
+	if( total > 0 )
+		return total;
+	else if( errno == ETIMEDOUT )
+		return 0;
+	return -1;
 }
 
 /**
@@ -156,31 +168,35 @@ ssize_t qio_read(int fd, void *buf, size_t nbytes, int timeoutms) {
  * @return the number of bytes written if successful, 0 on timeout,
  *         -1 for error.
  */
-ssize_t qio_write(int fd, const void *buf, size_t nbytes, int timeoutms) {
-    if (nbytes == 0)
-        return 0;
+ssize_t qio_write( int fd, const void* buf, size_t nbytes, int timeoutms )
+{
+	if( nbytes == 0 )
+		return 0;
 
-    ssize_t total = 0;
-    while (total < nbytes) {
-        if (timeoutms >= 0 && qio_wait_writable(fd, timeoutms) <= 0)
-            break;
-        ssize_t wsize = write(fd, buf + total, nbytes - total);
-        if (wsize <= 0) {
-            if (errno == EAGAIN || errno == EINPROGRESS) {
-                // possible with non-block io
-                usleep(1);
-                continue;
-            }
-            break;
-        }
-        total += wsize;
-    }
+	ssize_t total = 0;
+	while( total < nbytes )
+	{
+		if( timeoutms >= 0 && qio_wait_writable( fd, timeoutms ) <= 0 )
+			break;
+		ssize_t wsize = write( fd, buf + total, nbytes - total );
+		if( wsize <= 0 )
+		{
+			if( errno == EAGAIN || errno == EINPROGRESS )
+			{
+				// possible with non-block io
+				usleep( 1 );
+				continue;
+			}
+			break;
+		}
+		total += wsize;
+	}
 
-    if (total > 0)
-        return total;
-    else if (errno == ETIMEDOUT)
-        return 0;
-    return -1;
+	if( total > 0 )
+		return total;
+	else if( errno == ETIMEDOUT )
+		return 0;
+	return -1;
 }
 
 /**
@@ -196,44 +212,47 @@ ssize_t qio_write(int fd, const void *buf, size_t nbytes, int timeoutms) {
  * @return the number of bytes transferred if successful, 0 on timeout,
  *         -1 for error.
  */
-off_t qio_send(int outfd, int infd, off_t nbytes, int timeoutms) {
-    if (nbytes == 0)
-        return 0;
+off_t qio_send( int outfd, int infd, off_t nbytes, int timeoutms )
+{
+	if( nbytes == 0 )
+		return 0;
 
-    unsigned char buf[MAX_IOSEND_SIZE];
+	unsigned char buf[MAX_IOSEND_SIZE];
 
-    off_t total = 0;  // total size sent
-    while (total < nbytes) {
-        size_t chunksize;  // this time sending size
-        if (nbytes - total <= sizeof(buf))
-            chunksize = nbytes - total;
-        else
-            chunksize = sizeof(buf);
+	off_t total = 0; // total size sent
+	while( total < nbytes )
+	{
+		size_t chunksize; // this time sending size
+		if( nbytes - total <= sizeof( buf ) )
+			chunksize = nbytes - total;
+		else
+			chunksize = sizeof( buf );
 
-        // read
-        ssize_t rsize = qio_read(infd, buf, chunksize, timeoutms);
-        DEBUG("read %zd", rsize);
-        if (rsize <= 0)
-            break;
+		// read
+		ssize_t rsize = qio_read( infd, buf, chunksize, timeoutms );
+		DEBUG( "read %zd", rsize );
+		if( rsize <= 0 )
+			break;
 
-        // write
-        ssize_t wsize = qio_write(outfd, buf, rsize, timeoutms);
-        DEBUG("write %zd", wsize);
-        if (wsize <= 0)
-            break;
+		// write
+		ssize_t wsize = qio_write( outfd, buf, rsize, timeoutms );
+		DEBUG( "write %zd", wsize );
+		if( wsize <= 0 )
+			break;
 
-        total += wsize;
-        if (rsize != wsize) {
-            DEBUG("size mismatch. read:%zd, write:%zd", rsize, wsize);
-            break;
-        }
-    }
+		total += wsize;
+		if( rsize != wsize )
+		{
+			DEBUG( "size mismatch. read:%zd, write:%zd", rsize, wsize );
+			break;
+		}
+	}
 
-    if (total > 0)
-        return total;
-    else if (errno == ETIMEDOUT)
-        return 0;
-    return -1;
+	if( total > 0 )
+		return total;
+	else if( errno == ETIMEDOUT )
+		return 0;
+	return -1;
 }
 
 /**
@@ -254,37 +273,41 @@ off_t qio_send(int outfd, int infd, off_t nbytes, int timeoutms) {
  *  It means how many bytes are readed from the file descriptor,
  *  so the new-line characters will be counted, but not be stored.
  */
-ssize_t qio_gets(int fd, char *buf, size_t bufsize, int timeoutms) {
-    if (bufsize <= 1)
-        return -1;
+ssize_t qio_gets( int fd, char* buf, size_t bufsize, int timeoutms )
+{
+	if( bufsize <= 1 )
+		return -1;
 
-    ssize_t readcnt = 0;
-    char *ptr;
-    for (ptr = buf; readcnt < (bufsize - 1); ptr++) {
-        ssize_t rsize = qio_read(fd, ptr, 1, timeoutms);
-        if (rsize != 1) {
-            if (errno == EAGAIN || errno == EINPROGRESS) {
-                // possible with non-block io
-                usleep(1);
-                continue;
-            }
-            break;
-        }
+	ssize_t readcnt = 0;
+	char* ptr;
+	for( ptr = buf; readcnt < ( bufsize - 1 ); ptr++ )
+	{
+		ssize_t rsize = qio_read( fd, ptr, 1, timeoutms );
+		if( rsize != 1 )
+		{
+			if( errno == EAGAIN || errno == EINPROGRESS )
+			{
+				// possible with non-block io
+				usleep( 1 );
+				continue;
+			}
+			break;
+		}
 
-        readcnt++;
-        if (*ptr == '\r')
-            ptr--;
-        else if (*ptr == '\n')
-            break;
-    }
+		readcnt++;
+		if( *ptr == '\r' )
+			ptr--;
+		else if( *ptr == '\n' )
+			break;
+	}
 
-    *ptr = '\0';
+	*ptr = '\0';
 
-    if (readcnt > 0)
-        return readcnt;
-    else if (errno == ETIMEDOUT)
-        return 0;
-    return -1;
+	if( readcnt > 0 )
+		return readcnt;
+	else if( errno == ETIMEDOUT )
+		return 0;
+	return -1;
 }
 
 /**
@@ -298,17 +321,18 @@ ssize_t qio_gets(int fd, char *buf, size_t bufsize, int timeoutms) {
  * @return the number of bytes written including trailing newline characters
  *         if successful, 0 for timeout and -1 for errors.
  */
-ssize_t qio_puts(int fd, const char *str, int timeoutms) {
-    size_t strsize = strlen(str);
-    char *newstr = (char *) malloc(strsize + 1 + 1);
-    if (newstr == NULL)
-        return -1;
-    strncpy(newstr, str, strsize);
-    newstr[strsize] = '\n';
-    newstr[strsize + 1] = '\0';
-    ssize_t ret = qio_write(fd, newstr, strsize + 1, timeoutms);
-    free(newstr);
-    return ret;
+ssize_t qio_puts( int fd, const char* str, int timeoutms )
+{
+	size_t strsize = strlen( str );
+	char* newstr   = (char*)malloc( strsize + 1 + 1 );
+	if( newstr == NULL )
+		return -1;
+	strncpy( newstr, str, strsize );
+	newstr[strsize]     = '\n';
+	newstr[strsize + 1] = '\0';
+	ssize_t ret         = qio_write( fd, newstr, strsize + 1, timeoutms );
+	free( newstr );
+	return ret;
 }
 
 /**
@@ -322,14 +346,15 @@ ssize_t qio_puts(int fd, const char *str, int timeoutms) {
  * @return the number of bytes written including trailing newline characters
  *         if successful, 0 for timeout and -1 for errors.
  */
-ssize_t qio_printf(int fd, int timeoutms, const char *format, ...) {
-    char *buf;
-    DYNAMIC_VSPRINTF(buf, format);
-    if (buf == NULL)
-        return -1;
+ssize_t qio_printf( int fd, int timeoutms, const char* format, ... )
+{
+	char* buf;
+	DYNAMIC_VSPRINTF( buf, format );
+	if( buf == NULL )
+		return -1;
 
-    ssize_t ret = qio_write(fd, buf, strlen(buf), timeoutms);
-    free(buf);
+	ssize_t ret = qio_write( fd, buf, strlen( buf ), timeoutms );
+	free( buf );
 
-    return ret;
+	return ret;
 }

@@ -39,11 +39,11 @@
 extern "C" {
 #endif
 
-extern int qshm_init(const char *keyfile, int keyid, size_t size,
-                     bool recreate);
-extern int qshm_getid(const char *keyfile, int keyid);
-extern void *qshm_get(int shmid);
-extern bool qshm_free(int shmid);
+extern int qshm_init(
+   const char* keyfile, int keyid, size_t size, bool recreate );
+extern int qshm_getid( const char* keyfile, int keyid );
+extern void* qshm_get( int shmid );
+extern bool qshm_free( int shmid );
 
 #ifdef __cplusplus
 }

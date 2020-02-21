@@ -46,11 +46,12 @@
  *
  * @return current time in milliseconds.
  */
-long qtime_current_milli(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    long time = (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
-    return time;
+long qtime_current_milli( void )
+{
+	struct timeval tv;
+	gettimeofday( &tv, NULL );
+	long time = ( tv.tv_sec * 1000 ) + ( tv.tv_usec / 1000 );
+	return time;
 }
 
 /**
@@ -70,17 +71,19 @@ long qtime_current_milli(void) {
  *   free(timestr);
  * @endcode
  */
-char *qtime_localtime_strf(char *buf, int size, time_t utctime,
-                           const char *format) {
-    if (utctime == 0)
-        utctime = time(NULL);
-    struct tm *localtm = localtime(&utctime);
+char* qtime_localtime_strf(
+   char* buf, int size, time_t utctime, const char* format )
+{
+	if( utctime == 0 )
+		utctime = time( NULL );
+	struct tm* localtm = localtime( &utctime );
 
-    if (strftime(buf, size, format, localtm) == 0) {
-        snprintf(buf, size, "(buffer small)");
-    }
+	if( strftime( buf, size, format, localtm ) == 0 )
+	{
+		snprintf( buf, size, "(buffer small)" );
+	}
 
-    return buf;
+	return buf;
 }
 
 /**
@@ -100,11 +103,13 @@ char *qtime_localtime_strf(char *buf, int size, time_t utctime,
  *   free(timestr);
  * @endcode
  */
-char *qtime_localtime_str(time_t utctime) {
-    int size = sizeof(char) * (CONST_STRLEN("00-Jan-0000 00:00:00 +0000") + 1);
-    char *timestr = (char *) malloc(size);
-    qtime_localtime_strf(timestr, size, utctime, "%d-%b-%Y %H:%M:%S %z");
-    return timestr;
+char* qtime_localtime_str( time_t utctime )
+{
+	int size =
+	   sizeof( char ) * ( CONST_STRLEN( "00-Jan-0000 00:00:00 +0000" ) + 1 );
+	char* timestr = (char*)malloc( size );
+	qtime_localtime_strf( timestr, size, utctime, "%d-%b-%Y %H:%M:%S %z" );
+	return timestr;
 }
 
 /**
@@ -116,15 +121,17 @@ char *qtime_localtime_str(time_t utctime) {
  *
  * @code
  *   printf("%s", qtime_localtime_staticstr(0));  // now
- *   printf("%s", qtime_localtime_staticstr(time(NULL) + 86400)); // 1 day later
+ *   printf("%s", qtime_localtime_staticstr(time(NULL) + 86400)); // 1 day
+ * later
  * @endcode
  */
-const char *qtime_localtime_staticstr(time_t utctime) {
-    static char timestr[sizeof(char)
-            * (CONST_STRLEN("00-Jan-0000 00:00:00 +0000") + 1)];
-    qtime_localtime_strf(timestr, sizeof(timestr), utctime,
-                         "%d-%b-%Y %H:%M:%S %z");
-    return timestr;
+const char* qtime_localtime_staticstr( time_t utctime )
+{
+	static char timestr[sizeof( char ) *
+	   ( CONST_STRLEN( "00-Jan-0000 00:00:00 +0000" ) + 1 )];
+	qtime_localtime_strf(
+	   timestr, sizeof( timestr ), utctime, "%d-%b-%Y %H:%M:%S %z" );
+	return timestr;
 }
 
 /**
@@ -142,13 +149,14 @@ const char *qtime_localtime_staticstr(time_t utctime) {
  *   qtime_gmt_strf(buf, sizeof(buf), 0, "%H:%M:%S"); // HH:MM:SS
  * @endcode
  */
-char *qtime_gmt_strf(char *buf, int size, time_t utctime, const char *format) {
-    if (utctime == 0)
-        utctime = time(NULL);
-    struct tm *gmtm = gmtime(&utctime);
+char* qtime_gmt_strf( char* buf, int size, time_t utctime, const char* format )
+{
+	if( utctime == 0 )
+		utctime = time( NULL );
+	struct tm* gmtm = gmtime( &utctime );
 
-    strftime(buf, size, format, gmtm);
-    return buf;
+	strftime( buf, size, format, gmtm );
+	return buf;
 }
 
 /**
@@ -168,12 +176,13 @@ char *qtime_gmt_strf(char *buf, int size, time_t utctime, const char *format) {
  *   free(timestr);
  * @endcode
  */
-char *qtime_gmt_str(time_t utctime) {
-    int size = sizeof(char)
-            * (CONST_STRLEN("Mon, 00 Jan 0000 00:00:00 GMT") + 1);
-    char *timestr = (char *) malloc(size);
-    qtime_gmt_strf(timestr, size, utctime, "%a, %d %b %Y %H:%M:%S GMT");
-    return timestr;
+char* qtime_gmt_str( time_t utctime )
+{
+	int size =
+	   sizeof( char ) * ( CONST_STRLEN( "Mon, 00 Jan 0000 00:00:00 GMT" ) + 1 );
+	char* timestr = (char*)malloc( size );
+	qtime_gmt_strf( timestr, size, utctime, "%a, %d %b %Y %H:%M:%S GMT" );
+	return timestr;
 }
 
 /**
@@ -188,12 +197,13 @@ char *qtime_gmt_str(time_t utctime) {
  *   printf("%s", qtime_gmt_staticstr(time(NULL) + 86400));    // 1 day later
  * @endcode
  */
-const char *qtime_gmt_staticstr(time_t utctime) {
-    static char timestr[sizeof(char)
-            * (CONST_STRLEN("Mon, 00-Jan-0000 00:00:00 GMT") + 1)];
-    qtime_gmt_strf(timestr, sizeof(timestr), utctime,
-                   "%a, %d %b %Y %H:%M:%S GMT");
-    return timestr;
+const char* qtime_gmt_staticstr( time_t utctime )
+{
+	static char timestr[sizeof( char ) *
+	   ( CONST_STRLEN( "Mon, 00-Jan-0000 00:00:00 GMT" ) + 1 )];
+	qtime_gmt_strf(
+	   timestr, sizeof( timestr ), utctime, "%a, %d %b %Y %H:%M:%S GMT" );
+	return timestr;
 }
 
 /**
@@ -214,23 +224,27 @@ const char *qtime_gmt_staticstr(time_t utctime) {
  *   free(s);
  * @endcode
  */
-time_t qtime_parse_gmtstr(const char *gmtstr) {
-    struct tm gmtm;
-    if (strptime(gmtstr, "%a, %d %b %Y %H:%M:%S", &gmtm) == NULL)
-        return 0;
-    time_t utc = timegm(&gmtm);
-    if (utc < 0)
-        return -1;
+time_t qtime_parse_gmtstr( const char* gmtstr )
+{
+	struct tm gmtm;
+	if( strptime( gmtstr, "%a, %d %b %Y %H:%M:%S", &gmtm ) == NULL )
+		return 0;
+	time_t utc = timegm( &gmtm );
+	if( utc < 0 )
+		return -1;
 
-// parse timezone
-    char *p;
-    if ((p = strstr(gmtstr, "+")) != NULL) {
-        utc -= ((atoi(p + 1) / 100) * 60 * 60);
-        if (utc < 0)
-            return -1;
-    } else if ((p = strstr(gmtstr, "-")) != NULL) {
-        utc += ((atoi(p + 1) / 100) * 60 * 60);
-    }
+	// parse timezone
+	char* p;
+	if( ( p = strstr( gmtstr, "+" ) ) != NULL )
+	{
+		utc -= ( ( atoi( p + 1 ) / 100 ) * 60 * 60 );
+		if( utc < 0 )
+			return -1;
+	}
+	else if( ( p = strstr( gmtstr, "-" ) ) != NULL )
+	{
+		utc += ( ( atoi( p + 1 ) / 100 ) * 60 * 60 );
+	}
 
-    return utc;
+	return utc;
 }

@@ -43,22 +43,22 @@
 extern "C" {
 #endif
 
-extern void qtime_timespec_diff(struct timespec t1, struct timespec t2,
-                                struct timespec *diff);
-extern void qtime_timeval_diff(struct timeval t1, struct timeval t2,
-                               struct timeval *diff);
+extern void qtime_timespec_diff(
+   struct timespec t1, struct timespec t2, struct timespec* diff );
+extern void qtime_timeval_diff(
+   struct timeval t1, struct timeval t2, struct timeval* diff );
 
-extern long qtime_current_milli(void);
+extern long qtime_current_milli( void );
 
-extern char *qtime_localtime_strf(char *buf, int size, time_t utctime,
-                                  const char *format);
-extern char *qtime_localtime_str(time_t utctime);
-extern const char *qtime_localtime_staticstr(time_t utctime);
-extern char *qtime_gmt_strf(char *buf, int size, time_t utctime,
-                            const char *format);
-extern char *qtime_gmt_str(time_t utctime);
-extern const char *qtime_gmt_staticstr(time_t utctime);
-extern time_t qtime_parse_gmtstr(const char *gmtstr);
+extern char* qtime_localtime_strf(
+   char* buf, int size, time_t utctime, const char* format );
+extern char* qtime_localtime_str( time_t utctime );
+extern const char* qtime_localtime_staticstr( time_t utctime );
+extern char* qtime_gmt_strf(
+   char* buf, int size, time_t utctime, const char* format );
+extern char* qtime_gmt_str( time_t utctime );
+extern const char* qtime_gmt_staticstr( time_t utctime );
+extern time_t qtime_parse_gmtstr( const char* gmtstr );
 
 #ifdef __cplusplus
 }

@@ -38,10 +38,9 @@
  *
  *   [shared memory creater]
  *   // create shared memory
- *   int shmid = qshm_init("/some/file/for/generating/unique/key", 's', sizeof(struct SharedData), true);
- *   if(shmid < 0) {
- *     printf("ERROR: Can't initialize shared memory.\n");
- *     return -1;
+ *   int shmid = qshm_init("/some/file/for/generating/unique/key", 's',
+ * sizeof(struct SharedData), true); if(shmid < 0) { printf("ERROR: Can't
+ * initialize shared memory.\n"); return -1;
  *   }
  *
  *   // get shared memory pointer
@@ -86,34 +85,41 @@
  * @param size      size of shared memory
  * @param recreate  set to true to re-create shared-memory if already exists
  *
- * @return non-negative shared memory identifier if successful, otherwise returns -1
+ * @return non-negative shared memory identifier if successful, otherwise
+ * returns -1
  */
-int qshm_init(const char *keyfile, int keyid, size_t size, bool recreate) {
-    key_t semkey;
-    int shmid;
+int qshm_init( const char* keyfile, int keyid, size_t size, bool recreate )
+{
+	key_t semkey;
+	int shmid;
 
-    /* generate unique key using ftok() */
-    if (keyfile != NULL) {
-        semkey = ftok(keyfile, keyid);
-        if (semkey == -1)
-            return -1;
-    } else {
-        semkey = IPC_PRIVATE;
-    }
+	/* generate unique key using ftok() */
+	if( keyfile != NULL )
+	{
+		semkey = ftok( keyfile, keyid );
+		if( semkey == -1 )
+			return -1;
+	}
+	else
+	{
+		semkey = IPC_PRIVATE;
+	}
 
-    /* create shared memory */
-    if ((shmid = shmget(semkey, size, IPC_CREAT | IPC_EXCL | 0666)) == -1) {
-        if (recreate == false)
-            return -1;
+	/* create shared memory */
+	if( ( shmid = shmget( semkey, size, IPC_CREAT | IPC_EXCL | 0666 ) ) == -1 )
+	{
+		if( recreate == false )
+			return -1;
 
-        /* destroy & re-create */
-        if ((shmid = qshm_getid(keyfile, keyid)) >= 0)
-            qshm_free(shmid);
-        if ((shmid = shmget(semkey, size, IPC_CREAT | IPC_EXCL | 0666)) == -1)
-            return -1;
-    }
+		/* destroy & re-create */
+		if( ( shmid = qshm_getid( keyfile, keyid ) ) >= 0 )
+			qshm_free( shmid );
+		if( ( shmid = shmget( semkey, size, IPC_CREAT | IPC_EXCL | 0666 ) ) ==
+		   -1 )
+			return -1;
+	}
 
-    return shmid;
+	return shmid;
 }
 
 /**
@@ -122,21 +128,23 @@ int qshm_init(const char *keyfile, int keyid, size_t size, bool recreate) {
  * @param keyfile   seed for generating unique IPC key
  * @param keyid     seed for generating unique IPC key
  *
- * @return non-negative shared memory identifier if successful, otherwise returns -1
+ * @return non-negative shared memory identifier if successful, otherwise
+ * returns -1
  */
-int qshm_getid(const char *keyfile, int keyid) {
-    int shmid;
+int qshm_getid( const char* keyfile, int keyid )
+{
+	int shmid;
 
-    /* generate unique key using ftok() */
-    key_t semkey = ftok(keyfile, keyid);
-    if (semkey == -1)
-        return -1;
+	/* generate unique key using ftok() */
+	key_t semkey = ftok( keyfile, keyid );
+	if( semkey == -1 )
+		return -1;
 
-    /* get current shared memory id */
-    if ((shmid = shmget(semkey, 0, 0)) == -1)
-        return -1;
+	/* get current shared memory id */
+	if( ( shmid = shmget( semkey, 0, 0 ) ) == -1 )
+		return -1;
 
-    return shmid;
+	return shmid;
 }
 
 /**
@@ -146,15 +154,16 @@ int qshm_getid(const char *keyfile, int keyid) {
  *
  * @return a pointer of shared memory
  */
-void *qshm_get(int shmid) {
-    void *pShm;
+void* qshm_get( int shmid )
+{
+	void* pShm;
 
-    if (shmid < 0)
-        return NULL;
-    pShm = shmat(shmid, 0, 0);
-    if (pShm == (void *) -1)
-        return NULL;
-    return pShm;
+	if( shmid < 0 )
+		return NULL;
+	pShm = shmat( shmid, 0, 0 );
+	if( pShm == (void*)-1 )
+		return NULL;
+	return pShm;
 }
 
 /**
@@ -164,12 +173,13 @@ void *qshm_get(int shmid) {
  *
  * @return true if successful, otherwise returns false
  */
-bool qshm_free(int shmid) {
-    if (shmid < 0)
-        return false;
-    if (shmctl(shmid, IPC_RMID, 0) != 0)
-        return false;
-    return true;
+bool qshm_free( int shmid )
+{
+	if( shmid < 0 )
+		return false;
+	if( shmctl( shmid, IPC_RMID, 0 ) != 0 )
+		return false;
+	return true;
 }
 
 #endif /* DISABLE_IPC */

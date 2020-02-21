@@ -39,8 +39,8 @@
 extern "C" {
 #endif
 
-extern const char *qgetenv(const char *envname, const char *nullstr);
-extern char *qsyscmd(const char *cmd);
+extern const char* qgetenv( const char* envname, const char* nullstr );
+extern char* qsyscmd( const char* cmd );
 
 #ifdef __cplusplus
 }

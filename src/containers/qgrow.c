@@ -131,36 +131,39 @@
  *   Available options:
  *   - QGROW_THREADSAFE - make it thread-safe.
  */
-qgrow_t *qgrow(int options) {
-    qgrow_t *grow = (qgrow_t *) calloc(1, sizeof(qgrow_t));
-    if (grow == NULL) {
-        errno = ENOMEM;
-        return NULL;
-    }
+qgrow_t* qgrow( int options )
+{
+	qgrow_t* grow = (qgrow_t*)calloc( 1, sizeof( qgrow_t ) );
+	if( grow == NULL )
+	{
+		errno = ENOMEM;
+		return NULL;
+	}
 
-    grow->list = qlist(options);
-    if (grow->list == NULL) {
-        free(grow);
-        errno = ENOMEM;
-        return NULL;
-    }
+	grow->list = qlist( options );
+	if( grow->list == NULL )
+	{
+		free( grow );
+		errno = ENOMEM;
+		return NULL;
+	}
 
-    // methods
-    grow->add = qgrow_add;
-    grow->addstr = qgrow_addstr;
-    grow->addstrf = qgrow_addstrf;
+	// methods
+	grow->add     = qgrow_add;
+	grow->addstr  = qgrow_addstr;
+	grow->addstrf = qgrow_addstrf;
 
-    grow->size = qgrow_size;
-    grow->datasize = qgrow_datasize;
+	grow->size     = qgrow_size;
+	grow->datasize = qgrow_datasize;
 
-    grow->toarray = qgrow_toarray;
-    grow->tostring = qgrow_tostring;
+	grow->toarray  = qgrow_toarray;
+	grow->tostring = qgrow_tostring;
 
-    grow->clear = qgrow_clear;
-    grow->debug = qgrow_debug;
-    grow->free = qgrow_free;
+	grow->clear = qgrow_clear;
+	grow->debug = qgrow_debug;
+	grow->free  = qgrow_free;
 
-    return grow;
+	return grow;
 }
 
 /**
@@ -175,8 +178,9 @@ qgrow_t *qgrow(int options) {
  *  - EINVAL    : Invalid argument.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qgrow_add(qgrow_t *grow, const void *data, size_t size) {
-    return grow->list->addlast(grow->list, data, size);
+bool qgrow_add( qgrow_t* grow, const void* data, size_t size )
+{
+	return grow->list->addlast( grow->list, data, size );
 }
 
 /**
@@ -190,8 +194,9 @@ bool qgrow_add(qgrow_t *grow, const void *data, size_t size) {
  *  - EINVAL    : Invalid argument.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qgrow_addstr(qgrow_t *grow, const char *str) {
-    return grow->list->addlast(grow->list, str, strlen(str));
+bool qgrow_addstr( qgrow_t* grow, const char* str )
+{
+	return grow->list->addlast( grow->list, str, strlen( str ) );
 }
 
 /**
@@ -205,18 +210,20 @@ bool qgrow_addstr(qgrow_t *grow, const char *str) {
  *  - EINVAL    : Invalid argument.
  *  - ENOMEM    : Memory allocation failure.
  */
-bool qgrow_addstrf(qgrow_t *grow, const char *format, ...) {
-    char *str;
-    DYNAMIC_VSPRINTF(str, format);
-    if (str == NULL) {
-        errno = ENOMEM;
-        return false;
-    }
+bool qgrow_addstrf( qgrow_t* grow, const char* format, ... )
+{
+	char* str;
+	DYNAMIC_VSPRINTF( str, format );
+	if( str == NULL )
+	{
+		errno = ENOMEM;
+		return false;
+	}
 
-    bool ret = qgrow_addstr(grow, str);
-    free(str);
+	bool ret = qgrow_addstr( grow, str );
+	free( str );
 
-    return ret;
+	return ret;
 }
 
 /**
@@ -226,9 +233,7 @@ bool qgrow_addstrf(qgrow_t *grow, const char *format, ...) {
  *
  * @return the number of elements in this grow.
  */
-size_t qgrow_size(qgrow_t *grow) {
-    return grow->list->size(grow->list);
-}
+size_t qgrow_size( qgrow_t* grow ) { return grow->list->size( grow->list ); }
 
 /**
  * qgrow->datasize(): Returns the sum of total element size in this
@@ -238,8 +243,9 @@ size_t qgrow_size(qgrow_t *grow) {
  *
  * @return the sum of total element size in this grow.
  */
-size_t qgrow_datasize(qgrow_t *grow) {
-    return grow->list->datasize(grow->list);
+size_t qgrow_datasize( qgrow_t* grow )
+{
+	return grow->list->datasize( grow->list );
 }
 
 /**
@@ -255,8 +261,9 @@ size_t qgrow_datasize(qgrow_t *grow) {
  *  - ENOENT    : empty.
  *  - ENOMEM    : Memory allocation failure.
  */
-void *qgrow_toarray(qgrow_t *grow, size_t *size) {
-    return grow->list->toarray(grow->list, size);
+void* qgrow_toarray( qgrow_t* grow, size_t* size )
+{
+	return grow->list->toarray( grow->list, size );
 }
 
 /**
@@ -265,7 +272,8 @@ void *qgrow_toarray(qgrow_t *grow, size_t *size) {
  *
  * @param grow    qgrow_t container pointer.
  *
- * @return a pointer of finally merged strings(malloced), otherwise returns NULL
+ * @return a pointer of finally merged strings(malloced), otherwise returns
+ * NULL
  * @retval errno will be set in error condition.
  *  - ENOENT    : empty.
  *  - ENOMEM    : Memory allocation failure.
@@ -273,8 +281,9 @@ void *qgrow_toarray(qgrow_t *grow, size_t *size) {
  * @note
  * Return string is always terminated by '\0'.
  */
-char *qgrow_tostring(qgrow_t *grow) {
-    return grow->list->tostring(grow->list);
+char* qgrow_tostring( qgrow_t* grow )
+{
+	return grow->list->tostring( grow->list );
 }
 
 /**
@@ -282,9 +291,7 @@ char *qgrow_tostring(qgrow_t *grow) {
  *
  * @param grow    qgrow_t container pointer.
  */
-void qgrow_clear(qgrow_t *grow) {
-    grow->list->clear(grow->list);
-}
+void qgrow_clear( qgrow_t* grow ) { grow->list->clear( grow->list ); }
 
 /**
  * qgrow->debug(): Print out stored elements for debugging purpose.
@@ -296,8 +303,9 @@ void qgrow_clear(qgrow_t *grow) {
  * @retval errno will be set in error condition.
  *  - EIO   : Invalid output stream.
  */
-bool qgrow_debug(qgrow_t *grow, FILE *out) {
-    return grow->list->debug(grow->list, out);
+bool qgrow_debug( qgrow_t* grow, FILE* out )
+{
+	return grow->list->debug( grow->list, out );
 }
 
 /**
@@ -305,7 +313,8 @@ bool qgrow_debug(qgrow_t *grow, FILE *out) {
  *
  * @param grow    qgrow_t container pointer.
  */
-void qgrow_free(qgrow_t *grow) {
-    grow->list->free(grow->list);
-    free(grow);
+void qgrow_free( qgrow_t* grow )
+{
+	grow->list->free( grow->list );
+	free( grow );
 }

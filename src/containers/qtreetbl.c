@@ -27,16 +27,16 @@
  *****************************************************************************/
 
 /**
- * @file qtreetbl.c Tree Table container that implements "Left-Leaning Red-Black"
- * BST algorithm.
+ * @file qtreetbl.c Tree Table container that implements "Left-Leaning
+ * Red-Black" BST algorithm.
  *
- * qtreetbl implements a binary search tree that allows efficient in-order traversal
- * with O(log n) search time.
+ * qtreetbl implements a binary search tree that allows efficient in-order
+ * traversal with O(log n) search time.
  *
- * The algorithm qtreetbl specifically implements is left-leaning red-black tree
- * algorithm invented in 2008 by Robert Sedgewick. A left-leaning red–black tree
- * is a type of self-balancing binary search tree and it is a variant of the
- * red–black tree which was invented in 1972 by Rudolf Bayer.
+ * The algorithm qtreetbl specifically implements is left-leaning red-black
+ * tree algorithm invented in 2008 by Robert Sedgewick. A left-leaning
+ * red–black tree is a type of self-balancing binary search tree and it is a
+ * variant of the red–black tree which was invented in 1972 by Rudolf Bayer.
  *
  * References:
  * - http://www.cs.princeton.edu/~rs/talks/LLRB/LLRB.pdf
@@ -76,11 +76,11 @@
  * for in-memory operation. It's been using in all around the computing area.
  * I was very impressed about this variant, Left-Leaning version of Red-Black
  * about how it improves the performance and reduces the overall complexity.
- * Since it's relatively new algorithm, there's not many of practically functional
- * working codes yet other than proof of concept kinds. Here's one of fully
- * functional codes and I, Seungyoung Kim, would like to dedicate this code to
- * the genius inventor Robert Sedgewick and to all the great qLibc users.
- * Cheers!
+ * Since it's relatively new algorithm, there's not many of practically
+ * functional working codes yet other than proof of concept kinds. Here's one
+ * of fully functional codes and I, Seungyoung Kim, would like to dedicate this
+ * code to the genius inventor Robert Sedgewick and to all the great qLibc
+ * users. Cheers!
  *
  * Unique features:
  *   - iterator. (have you ever seen iterator implementation in LLRB tree?)
@@ -91,9 +91,10 @@
  * @code
  *  qtreetbl_t *tbl = qtreetbl(QTREETBL_THREADSAFE);
  *
- *  tbl->put(tbl, "key", "DATA", 4);          // use put_by_obj() for binary keys.
- *  void *data = tbl->get(tbl, "key", false); // use get_by_obj() for binary keys.
- *  tbl->remove(tbl, "key");                  // use remove_by_key() for binary keys.
+ *  tbl->put(tbl, "key", "DATA", 4);          // use put_by_obj() for binary
+ * keys. void *data = tbl->get(tbl, "key", false); // use get_by_obj() for
+ * binary keys. tbl->remove(tbl, "key");                  // use
+ * remove_by_key() for binary keys.
  *
  *  // iteration example
  *  tbl->lock(tbl);
@@ -126,28 +127,34 @@
 #ifndef _DOXYGEN_SKIP
 
 /* internal functions */
-static bool is_red(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *flip_color(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *rotate_left(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *rotate_right(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *move_red_left(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *move_red_right(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *fix(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *find_min(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *find_max(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *find_obj(qtreetbl_t *tbl, const void *name,
-                                size_t namesize);
-static qtreetbl_obj_t *remove_min(qtreetbl_obj_t *obj);
-static qtreetbl_obj_t *new_obj(bool red, const void *name, size_t namesize,
-                               const void *data, size_t datasize);
-static qtreetbl_obj_t *put_obj(qtreetbl_t *tbl, qtreetbl_obj_t *obj,
-                               const void *name, size_t namesize,
-                               const void *data, size_t datasize);
-static qtreetbl_obj_t *remove_obj(qtreetbl_t *tbl, qtreetbl_obj_t *obj,
-                                  const void *name, size_t namesize);
-static void free_objs(qtreetbl_obj_t *obj);
-static void free_obj(qtreetbl_obj_t *obj);
-static uint8_t reset_iterator(qtreetbl_t *tbl);
+static bool is_red( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* flip_color( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* rotate_left( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* rotate_right( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* move_red_left( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* move_red_right( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* fix( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* find_min( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* find_max( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* find_obj(
+   qtreetbl_t* tbl, const void* name, size_t namesize );
+static qtreetbl_obj_t* remove_min( qtreetbl_obj_t* obj );
+static qtreetbl_obj_t* new_obj( bool red,
+   const void* name,
+   size_t namesize,
+   const void* data,
+   size_t datasize );
+static qtreetbl_obj_t* put_obj( qtreetbl_t* tbl,
+   qtreetbl_obj_t* obj,
+   const void* name,
+   size_t namesize,
+   const void* data,
+   size_t datasize );
+static qtreetbl_obj_t* remove_obj(
+   qtreetbl_t* tbl, qtreetbl_obj_t* obj, const void* name, size_t namesize );
+static void free_objs( qtreetbl_obj_t* obj );
+static void free_obj( qtreetbl_obj_t* obj );
+static uint8_t reset_iterator( qtreetbl_t* tbl );
 
 #endif
 
@@ -168,62 +175,65 @@ static uint8_t reset_iterator(qtreetbl_t *tbl);
  *   Available options:
  *   - QTREETBL_THREADSAFE - make it thread-safe.
  */
-qtreetbl_t *qtreetbl(int options) {
-    qtreetbl_t *tbl = (qtreetbl_t *) calloc(1, sizeof(qtreetbl_t));
-    if (tbl == NULL)
-        goto malloc_failure;
+qtreetbl_t* qtreetbl( int options )
+{
+	qtreetbl_t* tbl = (qtreetbl_t*)calloc( 1, sizeof( qtreetbl_t ) );
+	if( tbl == NULL )
+		goto malloc_failure;
 
-    // handle options.
-    if (options & QTREETBL_THREADSAFE) {
-        Q_MUTEX_NEW(tbl->qmutex, true);
-        if (tbl->qmutex == NULL)
-            goto malloc_failure;
-    }
+	// handle options.
+	if( options & QTREETBL_THREADSAFE )
+	{
+		Q_MUTEX_NEW( tbl->qmutex, true );
+		if( tbl->qmutex == NULL )
+			goto malloc_failure;
+	}
 
-    // assign methods
-    tbl->set_compare = qtreetbl_set_compare;
+	// assign methods
+	tbl->set_compare = qtreetbl_set_compare;
 
-    tbl->put = qtreetbl_put;
-    tbl->putstr = qtreetbl_putstr;
-    tbl->putstrf = qtreetbl_putstrf;
-    tbl->put_by_obj = qtreetbl_put_by_obj;
+	tbl->put        = qtreetbl_put;
+	tbl->putstr     = qtreetbl_putstr;
+	tbl->putstrf    = qtreetbl_putstrf;
+	tbl->put_by_obj = qtreetbl_put_by_obj;
 
-    tbl->get = qtreetbl_get;
-    tbl->getstr = qtreetbl_getstr;
-    //tbl->getint = qtreetbl_getint;
-    tbl->get_by_obj = qtreetbl_get_by_obj;
+	tbl->get    = qtreetbl_get;
+	tbl->getstr = qtreetbl_getstr;
+	// tbl->getint = qtreetbl_getint;
+	tbl->get_by_obj = qtreetbl_get_by_obj;
 
-    tbl->remove = qtreetbl_remove;
-    tbl->remove_by_obj = qtreetbl_remove_by_obj;
+	tbl->remove        = qtreetbl_remove;
+	tbl->remove_by_obj = qtreetbl_remove_by_obj;
 
-    tbl->getnext = qtreetbl_getnext;
+	tbl->getnext = qtreetbl_getnext;
 
-    tbl->find_min = qtreetbl_find_min;
-    tbl->find_max = qtreetbl_find_max;
-    tbl->find_nearest = qtreetbl_find_nearest;
+	tbl->find_min     = qtreetbl_find_min;
+	tbl->find_max     = qtreetbl_find_max;
+	tbl->find_nearest = qtreetbl_find_nearest;
 
-    tbl->size = qtreetbl_size;
-    tbl->clear = qtreetbl_clear;
+	tbl->size  = qtreetbl_size;
+	tbl->clear = qtreetbl_clear;
 
-    tbl->lock = qtreetbl_lock;
-    tbl->unlock = qtreetbl_unlock;
+	tbl->lock   = qtreetbl_lock;
+	tbl->unlock = qtreetbl_unlock;
 
-    tbl->free = qtreetbl_free;
-    tbl->debug = qtreetbl_debug;
+	tbl->free  = qtreetbl_free;
+	tbl->debug = qtreetbl_debug;
 
-    // Set default comparison function.
-    qtreetbl_set_compare(tbl, qtreetbl_byte_cmp);
-    reset_iterator(tbl);
+	// Set default comparison function.
+	qtreetbl_set_compare( tbl, qtreetbl_byte_cmp );
+	reset_iterator( tbl );
 
-    return tbl;
+	return tbl;
 
-    malloc_failure:
-    errno = ENOMEM;
-    if (tbl) {
-        assert(tbl->qmutex == NULL);
-        qtreetbl_free(tbl);
-    }
-    return NULL;
+malloc_failure:
+	errno = ENOMEM;
+	if( tbl )
+	{
+		assert( tbl->qmutex == NULL );
+		qtreetbl_free( tbl );
+	}
+	return NULL;
 }
 
 /**
@@ -237,11 +247,13 @@ qtreetbl_t *qtreetbl(int options) {
  * both binary type key and string type key. Please refer
  * qtreetbl_byte_cmp() for your idea to make your own comparator,
  */
-void qtreetbl_set_compare(
-        qtreetbl_t *tbl,
-        int (*cmp)(const void *name1, size_t namesize1, const void *name2,
-                   size_t namesize2)) {
-    tbl->compare = cmp;
+void qtreetbl_set_compare( qtreetbl_t* tbl,
+   int ( *cmp )( const void* name1,
+      size_t namesize1,
+      const void* name2,
+      size_t namesize2 ) )
+{
+	tbl->compare = cmp;
 }
 
 /**
@@ -257,11 +269,14 @@ void qtreetbl_set_compare(
  *  - EINVAL : Invalid argument.
  *  - ENOMEM : Memory allocation failure.
  */
-bool qtreetbl_put(qtreetbl_t *tbl, const char *name, const void *data,
-                  size_t datasize) {
-    return qtreetbl_put_by_obj(tbl, name,
-                               (name != NULL) ? (strlen(name) + 1) : 0, data,
-                               datasize);
+bool qtreetbl_put(
+   qtreetbl_t* tbl, const char* name, const void* data, size_t datasize )
+{
+	return qtreetbl_put_by_obj( tbl,
+	   name,
+	   ( name != NULL ) ? ( strlen( name ) + 1 ) : 0,
+	   data,
+	   datasize );
 }
 
 /**
@@ -276,10 +291,13 @@ bool qtreetbl_put(qtreetbl_t *tbl, const char *name, const void *data,
  *  - EINVAL : Invalid argument.
  *  - ENOMEM : Memory allocation failure.
  */
-bool qtreetbl_putstr(qtreetbl_t *tbl, const char *name, const char *str) {
-    return qtreetbl_put_by_obj(tbl, name,
-                               (name != NULL) ? (strlen(name) + 1) : 0, str,
-                               (str != NULL) ? (strlen(str) + 1) : 0);
+bool qtreetbl_putstr( qtreetbl_t* tbl, const char* name, const char* str )
+{
+	return qtreetbl_put_by_obj( tbl,
+	   name,
+	   ( name != NULL ) ? ( strlen( name ) + 1 ) : 0,
+	   str,
+	   ( str != NULL ) ? ( strlen( str ) + 1 ) : 0 );
 }
 
 /**
@@ -294,22 +312,25 @@ bool qtreetbl_putstr(qtreetbl_t *tbl, const char *name, const char *str) {
  *  - EINVAL : Invalid argument.
  *  - ENOMEM : Memory allocation failure.
  */
-bool qtreetbl_putstrf(qtreetbl_t *tbl, const char *name, const char *format,
-                      ...) {
-    char *str;
-    DYNAMIC_VSPRINTF(str, format);
-    if (str == NULL) {
-        errno = ENOMEM;
-        return false;
-    }
+bool qtreetbl_putstrf(
+   qtreetbl_t* tbl, const char* name, const char* format, ... )
+{
+	char* str;
+	DYNAMIC_VSPRINTF( str, format );
+	if( str == NULL )
+	{
+		errno = ENOMEM;
+		return false;
+	}
 
-    bool ret = qtreetbl_putstr(tbl, name, str);
-    free(str);
-    return ret;
+	bool ret = qtreetbl_putstr( tbl, name, str );
+	free( str );
+	return ret;
 }
 
 /**
- * qtreetbl->put_by_obj(): Put an object data into this table with an object name.
+ * qtreetbl->put_by_obj(): Put an object data into this table with an object
+ * name.
  *
  * @param tbl       qtreetbl_t container pointer.
  * @param name      key name
@@ -325,26 +346,32 @@ bool qtreetbl_putstrf(qtreetbl_t *tbl, const char *name, const char *format,
  * @note
  *  This is the underlying put function which all other put methods use.
  */
-bool qtreetbl_put_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize,
-                         const void *data, size_t datasize) {
-    if (name == NULL || namesize == 0 || data == NULL || datasize == 0) {
-        errno = EINVAL;
-        return false;
-    }
+bool qtreetbl_put_by_obj( qtreetbl_t* tbl,
+   const void* name,
+   size_t namesize,
+   const void* data,
+   size_t datasize )
+{
+	if( name == NULL || namesize == 0 || data == NULL || datasize == 0 )
+	{
+		errno = EINVAL;
+		return false;
+	}
 
-    qtreetbl_lock(tbl);
-    errno = 0;
-    qtreetbl_obj_t *root = put_obj(tbl, tbl->root, name, namesize, data,
-                                   datasize);
-    if (root == NULL || errno == ENOMEM) {
-        qtreetbl_unlock(tbl);
-        return false;
-    }
-    root->red = false;
-    tbl->root = root;
-    qtreetbl_unlock(tbl);
+	qtreetbl_lock( tbl );
+	errno = 0;
+	qtreetbl_obj_t* root =
+	   put_obj( tbl, tbl->root, name, namesize, data, datasize );
+	if( root == NULL || errno == ENOMEM )
+	{
+		qtreetbl_unlock( tbl );
+		return false;
+	}
+	root->red = false;
+	tbl->root = root;
+	qtreetbl_unlock( tbl );
 
-    return true;
+	return true;
 }
 
 /**
@@ -381,11 +408,14 @@ bool qtreetbl_put_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize,
  *  directly and should not be de-allocated by user. In thread-safe mode,
  *  newmem flag must be set to true always.
  */
-void *qtreetbl_get(qtreetbl_t *tbl, const char *name, size_t *datasize,
-bool newmem) {
-    return qtreetbl_get_by_obj(tbl, name,
-                               (name != NULL) ? (strlen(name) + 1) : 0,
-                               datasize, newmem);
+void* qtreetbl_get(
+   qtreetbl_t* tbl, const char* name, size_t* datasize, bool newmem )
+{
+	return qtreetbl_get_by_obj( tbl,
+	   name,
+	   ( name != NULL ) ? ( strlen( name ) + 1 ) : 0,
+	   datasize,
+	   newmem );
 }
 
 /**
@@ -407,10 +437,10 @@ bool newmem) {
  *  directly and should not be de-allocated by user. In thread-safe mode,
  *  newmem flag must be set to true always.
  */
-char *qtreetbl_getstr(qtreetbl_t *tbl, const char *name, const bool newmem) {
-    return qtreetbl_get_by_obj(tbl, name,
-                               (name != NULL) ? (strlen(name) + 1) : 0, NULL,
-                               newmem);
+char* qtreetbl_getstr( qtreetbl_t* tbl, const char* name, const bool newmem )
+{
+	return qtreetbl_get_by_obj(
+	   tbl, name, ( name != NULL ) ? ( strlen( name ) + 1 ) : 0, NULL, newmem );
 }
 
 /**
@@ -434,24 +464,31 @@ char *qtreetbl_getstr(qtreetbl_t *tbl, const char *name, const bool newmem) {
  *  directly and should not be de-allocated by user. In thread-safe mode,
  *  newmem flag must be set to true always.
  */
-void *qtreetbl_get_by_obj(qtreetbl_t *tbl, const char *name, size_t namesize,
-                          size_t *datasize, bool newmem) {
-    if (name == NULL || namesize == 0) {
-        errno = EINVAL;
-        return NULL;
-    }
+void* qtreetbl_get_by_obj( qtreetbl_t* tbl,
+   const char* name,
+   size_t namesize,
+   size_t* datasize,
+   bool newmem )
+{
+	if( name == NULL || namesize == 0 )
+	{
+		errno = EINVAL;
+		return NULL;
+	}
 
-    qtreetbl_lock(tbl);
-    qtreetbl_obj_t *obj = find_obj(tbl, name, namesize);
-    void *data = NULL;
-    if (obj != NULL) {
-        data = (newmem) ? qmemdup(obj->data, obj->datasize) : obj->data;
-        if (data != NULL && datasize != NULL) {
-            *datasize = obj->datasize;
-        }
-    }
-    qtreetbl_unlock(tbl);
-    return data;
+	qtreetbl_lock( tbl );
+	qtreetbl_obj_t* obj = find_obj( tbl, name, namesize );
+	void* data          = NULL;
+	if( obj != NULL )
+	{
+		data = ( newmem ) ? qmemdup( obj->data, obj->datasize ) : obj->data;
+		if( data != NULL && datasize != NULL )
+		{
+			*datasize = obj->datasize;
+		}
+	}
+	qtreetbl_unlock( tbl );
+	return data;
 }
 
 /**
@@ -465,9 +502,10 @@ void *qtreetbl_get_by_obj(qtreetbl_t *tbl, const char *name, size_t namesize,
  *  - ENOENT : No such key found.
  *  - EINVAL : Invalid argument.
  */
-bool qtreetbl_remove(qtreetbl_t *tbl, const char *name) {
-    return qtreetbl_remove_by_obj(tbl, name,
-                                  (name != NULL) ? strlen(name) + 1 : 0);
+bool qtreetbl_remove( qtreetbl_t* tbl, const char* name )
+{
+	return qtreetbl_remove_by_obj(
+	   tbl, name, ( name != NULL ) ? strlen( name ) + 1 : 0 );
 }
 
 /**
@@ -482,21 +520,24 @@ bool qtreetbl_remove(qtreetbl_t *tbl, const char *name) {
  *  - ENOENT : No such key found.
  *  - EINVAL : Invalid argument.
  */
-bool qtreetbl_remove_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize) {
-    if (name == NULL) {
-        errno = EINVAL;
-        return false;
-    }
+bool qtreetbl_remove_by_obj(
+   qtreetbl_t* tbl, const void* name, size_t namesize )
+{
+	if( name == NULL )
+	{
+		errno = EINVAL;
+		return false;
+	}
 
-    qtreetbl_lock(tbl);
-    errno = 0;
-    tbl->root = remove_obj(tbl, tbl->root, name, namesize);
-    if (tbl->root)
-        tbl->root->red = false;
-    bool removed = (errno != ENOENT) ? true : false;
-    qtreetbl_unlock(tbl);
+	qtreetbl_lock( tbl );
+	errno     = 0;
+	tbl->root = remove_obj( tbl, tbl->root, name, namesize );
+	if( tbl->root )
+		tbl->root->red = false;
+	bool removed = ( errno != ENOENT ) ? true : false;
+	qtreetbl_unlock( tbl );
 
-    return removed;
+	return removed;
 }
 
 /**
@@ -552,11 +593,13 @@ bool qtreetbl_remove_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize) 
  *   while (tbl->getnext(tbl, &obj, false) == true) {
  *       if (...condition...) {
  *           char *name = qmemdup(obj.name, obj.namesize);  // keep the name
- *           size_t namesize = obj.namesize;                // for removal argument
+ *           size_t namesize = obj.namesize;                // for removal
+ * argument
  *
  *           tbl->remove_by_obj(tbl, obj.name, obj.namesize);  // remove
  *
- *           obj = tbl->find_nearest(tbl, name, namesize, false); // rewind one step back
+ *           obj = tbl->find_nearest(tbl, name, namesize, false); // rewind one
+ * step back
  *
  *           free(name);  // clean up
  *       }
@@ -571,51 +614,67 @@ bool qtreetbl_remove_by_obj(qtreetbl_t *tbl, const void *name, size_t namesize) 
  *  case iterator doesn't guarantee full sweep and possibly skip some visits.
  *  When deletion happens in getnext() loop, use find_nearest() to rewind the
  *  iterator one step back.
- *  - Object obj should be initialized with 0 by using memset() before first call.
+ *  - Object obj should be initialized with 0 by using memset() before first
+ * call.
  *  - If newmem flag is true, user should de-allocate obj.name and obj.data
  *  resources.
  */
-bool qtreetbl_getnext(qtreetbl_t *tbl, qtreetbl_obj_t *obj, const bool newmem) {
-    if (obj == NULL) {
-        errno = EINVAL;
-        return NULL;
-    }
+bool qtreetbl_getnext(
+   qtreetbl_t* tbl, qtreetbl_obj_t* obj, const bool newmem )
+{
+	if( obj == NULL )
+	{
+		errno = EINVAL;
+		return NULL;
+	}
 
-    uint8_t tid = obj->tid;
-    if (obj->next == NULL) {  // first time call
-        if (tbl->root == NULL) {
-            return false;
-        }
-        // get a new iterator id
-        tid = reset_iterator(tbl);;
-    }
+	uint8_t tid = obj->tid;
+	if( obj->next == NULL )
+	{ // first time call
+		if( tbl->root == NULL )
+		{
+			return false;
+		}
+		// get a new iterator id
+		tid = reset_iterator( tbl );
+		;
+	}
 
-    qtreetbl_obj_t *cursor = ((obj->next != NULL) ? obj->next : tbl->root);
-    while (cursor != NULL) {
-        if (cursor->left && cursor->left->tid != tid) {
-            cursor->left->next = cursor;
-            cursor = cursor->left;
-            continue;
-        } else if (cursor->tid != tid) {
-            cursor->tid = tid;
-            *obj = *cursor;
-            if (newmem) {
-                obj->name = qmemdup(cursor->name, cursor->namesize);
-                obj->data = qmemdup(cursor->data, cursor->datasize);
-            }
-            obj->next = cursor;  // store original address in tree for next iteration
-            return true;
-        } else if (cursor->right && cursor->right->tid != tid) {
-            cursor->right->next = cursor;
-            cursor = cursor->right;
-            continue;
-        }
-        cursor = cursor->next;
-    }
+	qtreetbl_obj_t* cursor = ( ( obj->next != NULL ) ? obj->next : tbl->root );
+	while( cursor != NULL )
+	{
+		if( cursor->left && cursor->left->tid != tid )
+		{
+			cursor->left->next = cursor;
+			cursor             = cursor->left;
+			continue;
+		}
+		else if( cursor->tid != tid )
+		{
+			cursor->tid = tid;
+			*obj        = *cursor;
+			if( newmem )
+			{
+				obj->name = qmemdup( cursor->name, cursor->namesize );
+				obj->data = qmemdup( cursor->data, cursor->datasize );
+			}
+			obj->next =
+			   cursor; // store original address in tree for next iteration
+			return true;
+		}
+		else if( cursor->right && cursor->right->tid != tid )
+		{
+			cursor->right->next = cursor;
+			cursor              = cursor->right;
+			continue;
+		}
+		cursor = cursor->next;
+	}
 
-    // end of travel
-    reset_iterator(tbl);  // to allow iteration start over directly from find_nearest()
-    return false;
+	// end of travel
+	reset_iterator(
+	   tbl ); // to allow iteration start over directly from find_nearest()
+	return false;
 }
 
 /**
@@ -629,21 +688,24 @@ bool qtreetbl_getnext(qtreetbl_t *tbl, qtreetbl_obj_t *obj, const bool newmem) {
  * @note
  *  It's user's responsibility to free the return.
  */
-void *qtreetbl_find_min(qtreetbl_t *tbl, size_t *namesize) {
-    qtreetbl_lock(tbl);
-    qtreetbl_obj_t *obj = find_min(tbl->root);
-    if (obj == NULL) {
-        errno = ENOENT;
-        qtreetbl_unlock(tbl);
-        return NULL;
-    }
+void* qtreetbl_find_min( qtreetbl_t* tbl, size_t* namesize )
+{
+	qtreetbl_lock( tbl );
+	qtreetbl_obj_t* obj = find_min( tbl->root );
+	if( obj == NULL )
+	{
+		errno = ENOENT;
+		qtreetbl_unlock( tbl );
+		return NULL;
+	}
 
-    if (namesize != NULL) {
-        *namesize = obj->namesize;
-    }
-    void *name = qmemdup(obj->name, obj->namesize);
-    qtreetbl_unlock(tbl);
-    return name;
+	if( namesize != NULL )
+	{
+		*namesize = obj->namesize;
+	}
+	void* name = qmemdup( obj->name, obj->namesize );
+	qtreetbl_unlock( tbl );
+	return name;
 }
 
 /**
@@ -657,21 +719,24 @@ void *qtreetbl_find_min(qtreetbl_t *tbl, size_t *namesize) {
  * @note
  *  It's user's responsibility to free the return.
  */
-void *qtreetbl_find_max(qtreetbl_t *tbl, size_t *namesize) {
-    qtreetbl_lock(tbl);
-    qtreetbl_obj_t *obj = find_max(tbl->root);
-    if (obj == NULL) {
-        errno = ENOENT;
-        qtreetbl_unlock(tbl);
-        return NULL;
-    }
+void* qtreetbl_find_max( qtreetbl_t* tbl, size_t* namesize )
+{
+	qtreetbl_lock( tbl );
+	qtreetbl_obj_t* obj = find_max( tbl->root );
+	if( obj == NULL )
+	{
+		errno = ENOENT;
+		qtreetbl_unlock( tbl );
+		return NULL;
+	}
 
-    if (namesize != NULL) {
-        *namesize = obj->namesize;
-    }
-    void *name = qmemdup(obj->name, obj->namesize);
-    qtreetbl_unlock(tbl);
-    return name;
+	if( namesize != NULL )
+	{
+		*namesize = obj->namesize;
+	}
+	void* name = qmemdup( obj->name, obj->namesize );
+	qtreetbl_unlock( tbl );
+	return name;
 }
 
 /**
@@ -709,62 +774,73 @@ void *qtreetbl_find_max(qtreetbl_t *tbl, size_t *namesize) {
  *  than given search key is that when there's no smaller keys available
  *  in the table. In such case, it'll return the nearest bigger key.
  */
-qtreetbl_obj_t qtreetbl_find_nearest(qtreetbl_t *tbl, const void *name,
-                                     size_t namesize, bool newmem) {
-    qtreetbl_obj_t retobj;
-    memset((void*) &retobj, 0, sizeof(retobj));
+qtreetbl_obj_t qtreetbl_find_nearest(
+   qtreetbl_t* tbl, const void* name, size_t namesize, bool newmem )
+{
+	qtreetbl_obj_t retobj;
+	memset( (void*)&retobj, 0, sizeof( retobj ) );
 
-    if (name == NULL || namesize == 0) {
-        errno = EINVAL;
-        return retobj;
-    }
+	if( name == NULL || namesize == 0 )
+	{
+		errno = EINVAL;
+		return retobj;
+	}
 
-    qtreetbl_lock(tbl);
-    qtreetbl_obj_t *obj, *lastobj;
-    for (obj = lastobj = tbl->root; obj != NULL;) {
-        int cmp = tbl->compare(name, namesize, obj->name, obj->namesize);
-        if (cmp == 0) {
-            break;
-        }
-        lastobj = obj;
-        if (cmp < 0) {
-            if (obj->left)
-                obj->left->next = obj;
-            obj = obj->left;
-        } else {
-            if (obj->right)
-                obj->right->next = obj;
-            obj = obj->right;
-        }
-    }
+	qtreetbl_lock( tbl );
+	qtreetbl_obj_t *obj, *lastobj;
+	for( obj = lastobj = tbl->root; obj != NULL; )
+	{
+		int cmp = tbl->compare( name, namesize, obj->name, obj->namesize );
+		if( cmp == 0 )
+		{
+			break;
+		}
+		lastobj = obj;
+		if( cmp < 0 )
+		{
+			if( obj->left )
+				obj->left->next = obj;
+			obj = obj->left;
+		}
+		else
+		{
+			if( obj->right )
+				obj->right->next = obj;
+			obj = obj->right;
+		}
+	}
 
-    if (obj == NULL) {
-        for (obj = lastobj;
-                obj != NULL
-                        && (tbl->compare(name, namesize, obj->name,
-                                         obj->namesize) < 0); obj = obj->next)
-            ;
-        if (obj == NULL) {
-            obj = lastobj;
-        }
-    }
+	if( obj == NULL )
+	{
+		for( obj = lastobj; obj != NULL &&
+		     ( tbl->compare( name, namesize, obj->name, obj->namesize ) < 0 );
+		     obj = obj->next )
+			;
+		if( obj == NULL )
+		{
+			obj = lastobj;
+		}
+	}
 
-    if (obj) {
-        retobj = *obj;
-        if (newmem) {
-            retobj.name = qmemdup(obj->name, obj->namesize);
-            retobj.data = qmemdup(obj->data, obj->datasize);
-        }
-        // set travel info to be used for iteration in getnext()
-        retobj.tid = tbl->tid;
-        retobj.next = obj;
+	if( obj )
+	{
+		retobj = *obj;
+		if( newmem )
+		{
+			retobj.name = qmemdup( obj->name, obj->namesize );
+			retobj.data = qmemdup( obj->data, obj->datasize );
+		}
+		// set travel info to be used for iteration in getnext()
+		retobj.tid  = tbl->tid;
+		retobj.next = obj;
+	}
+	else
+	{
+		errno = ENOENT;
+	}
 
-    } else {
-        errno = ENOENT;
-    }
-
-    qtreetbl_unlock(tbl);
-    return retobj;
+	qtreetbl_unlock( tbl );
+	return retobj;
 }
 
 /**
@@ -774,21 +850,20 @@ qtreetbl_obj_t qtreetbl_find_nearest(qtreetbl_t *tbl, const void *name,
  *
  * @return number of elements stored
  */
-size_t qtreetbl_size(qtreetbl_t *tbl) {
-    return tbl->num;
-}
+size_t qtreetbl_size( qtreetbl_t* tbl ) { return tbl->num; }
 
 /**
  * qtreetbl->clear(): Clears the table so that it contains no keys.
  *
  * @param tbl   qtreetbl_t container pointer.
  */
-void qtreetbl_clear(qtreetbl_t *tbl) {
-    qtreetbl_lock(tbl);
-    free_objs(tbl->root);
-    tbl->root = NULL;
-    tbl->num = 0;
-    qtreetbl_unlock(tbl);
+void qtreetbl_clear( qtreetbl_t* tbl )
+{
+	qtreetbl_lock( tbl );
+	free_objs( tbl->root );
+	tbl->root = NULL;
+	tbl->num  = 0;
+	qtreetbl_unlock( tbl );
 }
 
 /**
@@ -804,9 +879,7 @@ void qtreetbl_clear(qtreetbl_t *tbl) {
  *  This operation will do nothing if QTREETBL_THREADSAFE option was not
  *  given at the initialization time.
  */
-void qtreetbl_lock(qtreetbl_t *tbl) {
-    Q_MUTEX_ENTER(tbl->qmutex);
-}
+void qtreetbl_lock( qtreetbl_t* tbl ) { Q_MUTEX_ENTER( tbl->qmutex ); }
 
 /**
  * qtreetbl->unlock(): Leave critical section.
@@ -817,28 +890,28 @@ void qtreetbl_lock(qtreetbl_t *tbl) {
  *  This operation will do nothing if QTREETBL_THREADSAFE option was not
  *  given at the initialization time.
  */
-void qtreetbl_unlock(qtreetbl_t *tbl) {
-    Q_MUTEX_LEAVE(tbl->qmutex);
-}
+void qtreetbl_unlock( qtreetbl_t* tbl ) { Q_MUTEX_LEAVE( tbl->qmutex ); }
 
 /**
  * qtreetbl->free(): De-allocate the table
  *
  * @param tbl   qtreetbl_t container pointer.
  */
-void qtreetbl_free(qtreetbl_t *tbl) {
-    qtreetbl_clear(tbl);
-    Q_MUTEX_DESTROY(tbl->qmutex);
-    free(tbl);
+void qtreetbl_free( qtreetbl_t* tbl )
+{
+	qtreetbl_clear( tbl );
+	Q_MUTEX_DESTROY( tbl->qmutex );
+	free( tbl );
 }
 
-int qtreetbl_byte_cmp(const void *name1, size_t namesize1, const void *name2,
-                      size_t namesize2) {
-    size_t minsize = (namesize1 < namesize2) ? namesize1 : namesize2;
-    int cmp = memcmp(name1, name2, minsize);
-    if (cmp != 0 || namesize1 == namesize2)
-        return cmp;
-    return (namesize1 < namesize2) ? -1 : +1;
+int qtreetbl_byte_cmp(
+   const void* name1, size_t namesize1, const void* name2, size_t namesize2 )
+{
+	size_t minsize = ( namesize1 < namesize2 ) ? namesize1 : namesize2;
+	int cmp        = memcmp( name1, name2, minsize );
+	if( cmp != 0 || namesize1 == namesize2 )
+		return cmp;
+	return ( namesize1 < namesize2 ) ? -1 : +1;
 }
 
 /**
@@ -851,288 +924,349 @@ int qtreetbl_byte_cmp(const void *name1, size_t namesize1, const void *name2,
  * @retval errno will be set in error condition.
  *  - EIO : Invalid output stream.
  */
-bool qtreetbl_debug(qtreetbl_t *tbl, FILE *out) {
-    if (out == NULL) {
-        errno = EIO;
-        return false;
-    }
+bool qtreetbl_debug( qtreetbl_t* tbl, FILE* out )
+{
+	if( out == NULL )
+	{
+		errno = EIO;
+		return false;
+	}
 
-    qtreetbl_lock(tbl);
+	qtreetbl_lock( tbl );
 
-    qtreetbl_unlock(tbl);
+	qtreetbl_unlock( tbl );
 
-    return true;
+	return true;
 }
 
 #ifndef _DOXYGEN_SKIP
 
-static bool is_red(qtreetbl_obj_t *obj) {
-    return (obj != NULL) ? obj->red : false;
+static bool is_red( qtreetbl_obj_t* obj )
+{
+	return ( obj != NULL ) ? obj->red : false;
 }
 
-static qtreetbl_obj_t *flip_color(qtreetbl_obj_t *obj) {
-    obj->red = !(obj->red);
-    obj->left->red = !(obj->left->red);
-    obj->right->red = !(obj->right->red);
-    return obj;
+static qtreetbl_obj_t* flip_color( qtreetbl_obj_t* obj )
+{
+	obj->red        = !( obj->red );
+	obj->left->red  = !( obj->left->red );
+	obj->right->red = !( obj->right->red );
+	return obj;
 }
 
-static qtreetbl_obj_t *rotate_left(qtreetbl_obj_t *obj) {
-    qtreetbl_obj_t *x = obj->right;
-    obj->right = x->left;
-    x->left = obj;
-    x->red = x->left->red;
-    x->left->red = true;
-    return x;
+static qtreetbl_obj_t* rotate_left( qtreetbl_obj_t* obj )
+{
+	qtreetbl_obj_t* x = obj->right;
+	obj->right        = x->left;
+	x->left           = obj;
+	x->red            = x->left->red;
+	x->left->red      = true;
+	return x;
 }
 
-static qtreetbl_obj_t *rotate_right(qtreetbl_obj_t *obj) {
-    qtreetbl_obj_t *x = obj->left;
-    obj->left = x->right;
-    x->right = obj;
-    x->red = x->right->red;
-    x->right->red = true;
-    return x;
+static qtreetbl_obj_t* rotate_right( qtreetbl_obj_t* obj )
+{
+	qtreetbl_obj_t* x = obj->left;
+	obj->left         = x->right;
+	x->right          = obj;
+	x->red            = x->right->red;
+	x->right->red     = true;
+	return x;
 }
 
-static qtreetbl_obj_t *move_red_left(qtreetbl_obj_t *obj) {
-    flip_color(obj);
-    if (obj->right && is_red(obj->right->left)) {
-        obj->right = rotate_right(obj->right);
-        obj = rotate_left(obj);
-        flip_color(obj);
-    }
-    return obj;
+static qtreetbl_obj_t* move_red_left( qtreetbl_obj_t* obj )
+{
+	flip_color( obj );
+	if( obj->right && is_red( obj->right->left ) )
+	{
+		obj->right = rotate_right( obj->right );
+		obj        = rotate_left( obj );
+		flip_color( obj );
+	}
+	return obj;
 }
 
-static qtreetbl_obj_t *move_red_right(qtreetbl_obj_t *obj) {
-    flip_color(obj);
-    if (obj->left && is_red(obj->left->left)) {
-        obj = rotate_right(obj);
-        flip_color(obj);
-    }
-    return obj;
+static qtreetbl_obj_t* move_red_right( qtreetbl_obj_t* obj )
+{
+	flip_color( obj );
+	if( obj->left && is_red( obj->left->left ) )
+	{
+		obj = rotate_right( obj );
+		flip_color( obj );
+	}
+	return obj;
 }
 
-static qtreetbl_obj_t *fix(qtreetbl_obj_t *obj) {
-    // rotate right red to left
-    if (is_red(obj->right)) {
-        obj = rotate_left(obj);
-    }
-    // rotate left red-red to right
-    if (obj->left && is_red(obj->left) && is_red(obj->left->left)) {
-        obj = rotate_right(obj);
-    }
-    // split 4-nodes
-    if (is_red(obj->left) && is_red(obj->right)) {
-        flip_color(obj);
-    }
-    return obj;
+static qtreetbl_obj_t* fix( qtreetbl_obj_t* obj )
+{
+	// rotate right red to left
+	if( is_red( obj->right ) )
+	{
+		obj = rotate_left( obj );
+	}
+	// rotate left red-red to right
+	if( obj->left && is_red( obj->left ) && is_red( obj->left->left ) )
+	{
+		obj = rotate_right( obj );
+	}
+	// split 4-nodes
+	if( is_red( obj->left ) && is_red( obj->right ) )
+	{
+		flip_color( obj );
+	}
+	return obj;
 }
 
-static qtreetbl_obj_t *find_min(qtreetbl_obj_t *obj) {
-    if (obj == NULL) {
-        errno = ENOENT;
-        return NULL;
-    }
+static qtreetbl_obj_t* find_min( qtreetbl_obj_t* obj )
+{
+	if( obj == NULL )
+	{
+		errno = ENOENT;
+		return NULL;
+	}
 
-    qtreetbl_obj_t *o;
-    for (o = obj; o->left != NULL; o = o->left)
-        ;
-    return o;
+	qtreetbl_obj_t* o;
+	for( o = obj; o->left != NULL; o = o->left )
+		;
+	return o;
 }
 
-static qtreetbl_obj_t *find_max(qtreetbl_obj_t *obj) {
-    if (obj == NULL) {
-        errno = ENOENT;
-        return NULL;
-    }
+static qtreetbl_obj_t* find_max( qtreetbl_obj_t* obj )
+{
+	if( obj == NULL )
+	{
+		errno = ENOENT;
+		return NULL;
+	}
 
-    qtreetbl_obj_t *o;
-    for (o = obj; o->right != NULL; o = o->right)
-        ;
-    return o;
+	qtreetbl_obj_t* o;
+	for( o = obj; o->right != NULL; o = o->right )
+		;
+	return o;
 }
 
-static qtreetbl_obj_t *find_obj(qtreetbl_t *tbl, const void *name,
-                                size_t namesize) {
-    if (name == NULL || namesize == 0) {
-        errno = EINVAL;
-        return NULL;
-    }
+static qtreetbl_obj_t* find_obj(
+   qtreetbl_t* tbl, const void* name, size_t namesize )
+{
+	if( name == NULL || namesize == 0 )
+	{
+		errno = EINVAL;
+		return NULL;
+	}
 
-    qtreetbl_lock(tbl);
-    qtreetbl_obj_t *obj;
-    for (obj = tbl->root; obj != NULL;) {
-        int cmp = tbl->compare(name, namesize, obj->name, obj->namesize);
-        if (cmp == 0) {
-            qtreetbl_unlock(tbl);
-            return obj;
-        }
-        obj = (cmp < 0) ? obj->left : obj->right;
-    }
-    qtreetbl_unlock(tbl);
+	qtreetbl_lock( tbl );
+	qtreetbl_obj_t* obj;
+	for( obj = tbl->root; obj != NULL; )
+	{
+		int cmp = tbl->compare( name, namesize, obj->name, obj->namesize );
+		if( cmp == 0 )
+		{
+			qtreetbl_unlock( tbl );
+			return obj;
+		}
+		obj = ( cmp < 0 ) ? obj->left : obj->right;
+	}
+	qtreetbl_unlock( tbl );
 
-    errno = ENOENT;
-    return NULL;
+	errno = ENOENT;
+	return NULL;
 }
 
-static qtreetbl_obj_t *remove_min(qtreetbl_obj_t *obj) {
-    if (obj->left == NULL) {
-        // 3-nodes are left-leaning, so this is a leaf.
-        free(obj->name);
-        free(obj->data);
-        return NULL;
-    }
-    if (!is_red(obj->left) && !is_red(obj->left->left)) {
-        obj = move_red_left(obj);
-    }
-    obj->left = remove_min(obj->left);
-    return fix(obj);
+static qtreetbl_obj_t* remove_min( qtreetbl_obj_t* obj )
+{
+	if( obj->left == NULL )
+	{
+		// 3-nodes are left-leaning, so this is a leaf.
+		free( obj->name );
+		free( obj->data );
+		return NULL;
+	}
+	if( !is_red( obj->left ) && !is_red( obj->left->left ) )
+	{
+		obj = move_red_left( obj );
+	}
+	obj->left = remove_min( obj->left );
+	return fix( obj );
 }
 
-static qtreetbl_obj_t *new_obj(bool red, const void *name, size_t namesize,
-                               const void *data, size_t datasize) {
-    qtreetbl_obj_t *obj = (qtreetbl_obj_t *) calloc(1, sizeof(qtreetbl_obj_t));
-    void *copyname = qmemdup(name, namesize);
-    void *copydata = qmemdup(data, datasize);
+static qtreetbl_obj_t* new_obj( bool red,
+   const void* name,
+   size_t namesize,
+   const void* data,
+   size_t datasize )
+{
+	qtreetbl_obj_t* obj =
+	   (qtreetbl_obj_t*)calloc( 1, sizeof( qtreetbl_obj_t ) );
+	void* copyname = qmemdup( name, namesize );
+	void* copydata = qmemdup( data, datasize );
 
-    if (obj == NULL || copyname == NULL || copydata == NULL) {
-        errno = ENOMEM;
-        free(obj);
-        free(copyname);
-        free(copydata);
-        return NULL;
-    }
+	if( obj == NULL || copyname == NULL || copydata == NULL )
+	{
+		errno = ENOMEM;
+		free( obj );
+		free( copyname );
+		free( copydata );
+		return NULL;
+	}
 
-    obj->red = red;
-    obj->name = copyname;
-    obj->namesize = namesize;
-    obj->data = copydata;
-    obj->datasize = datasize;
+	obj->red      = red;
+	obj->name     = copyname;
+	obj->namesize = namesize;
+	obj->data     = copydata;
+	obj->datasize = datasize;
 
-    return obj;
+	return obj;
 }
 
-static qtreetbl_obj_t *put_obj(qtreetbl_t *tbl, qtreetbl_obj_t *obj,
-                               const void *name, size_t namesize,
-                               const void *data, size_t datasize) {
-    if (obj == NULL) {
-        tbl->num++;
-        return new_obj(true, name, namesize, data, datasize);
-    }
+static qtreetbl_obj_t* put_obj( qtreetbl_t* tbl,
+   qtreetbl_obj_t* obj,
+   const void* name,
+   size_t namesize,
+   const void* data,
+   size_t datasize )
+{
+	if( obj == NULL )
+	{
+		tbl->num++;
+		return new_obj( true, name, namesize, data, datasize );
+	}
 
-    // split 4-nodes on the way down.
-    if (is_red(obj->left) && is_red(obj->right)) {
-        flip_color(obj);
-    }
+	// split 4-nodes on the way down.
+	if( is_red( obj->left ) && is_red( obj->right ) )
+	{
+		flip_color( obj );
+	}
 
-    int cmp = tbl->compare(obj->name, obj->namesize, name, namesize);
-    if (cmp == 0) {  // existing key found.
-        void *copydata = qmemdup(data, datasize);
-        if (copydata != NULL) {
-            free(obj->data);
-            obj->data = copydata;
-            obj->datasize = datasize;
-        }
-    } else if (cmp < 0) {
-        obj->right = put_obj(tbl, obj->right, name, namesize, data, datasize);
-    } else {
-        obj->left = put_obj(tbl, obj->left, name, namesize, data, datasize);
-    }
+	int cmp = tbl->compare( obj->name, obj->namesize, name, namesize );
+	if( cmp == 0 )
+	{ // existing key found.
+		void* copydata = qmemdup( data, datasize );
+		if( copydata != NULL )
+		{
+			free( obj->data );
+			obj->data     = copydata;
+			obj->datasize = datasize;
+		}
+	}
+	else if( cmp < 0 )
+	{
+		obj->right = put_obj( tbl, obj->right, name, namesize, data, datasize );
+	}
+	else
+	{
+		obj->left = put_obj( tbl, obj->left, name, namesize, data, datasize );
+	}
 
-    // fix right-leaning reds on the way up
-    if (is_red(obj->right)) {
-        obj = rotate_left(obj);
-    }
+	// fix right-leaning reds on the way up
+	if( is_red( obj->right ) )
+	{
+		obj = rotate_left( obj );
+	}
 
-    // fix two reds in a row on the way up
-    if (is_red(obj->left) && is_red(obj->left->left)) {
-        obj = rotate_right(obj);
-    }
+	// fix two reds in a row on the way up
+	if( is_red( obj->left ) && is_red( obj->left->left ) )
+	{
+		obj = rotate_right( obj );
+	}
 
-    return obj;
+	return obj;
 }
 
-static qtreetbl_obj_t *remove_obj(qtreetbl_t *tbl, qtreetbl_obj_t *obj,
-                                  const void *name, size_t namesize) {
-    if (obj == NULL) {
-        errno = ENOENT;
-        return NULL;
-    }
+static qtreetbl_obj_t* remove_obj(
+   qtreetbl_t* tbl, qtreetbl_obj_t* obj, const void* name, size_t namesize )
+{
+	if( obj == NULL )
+	{
+		errno = ENOENT;
+		return NULL;
+	}
 
-    if (tbl->compare(name, namesize, obj->name, obj->namesize) < 0) {  // left
-        // move red left
-        if (obj->left && (!is_red(obj->left) && !is_red(obj->left->left))) {
-            obj = move_red_left(obj);
-        }
-        // keep going down to the left
-        obj->left = remove_obj(tbl, obj->left, name, namesize);
-    } else {  // right or equal
-        if (is_red(obj->left)) {
-            obj = rotate_right(obj);
-        }
-        // remove if equal at the bottom
-        if (tbl->compare(name, namesize, obj->name, obj->namesize)
-                == 0&& obj->right == NULL) {
-            free(obj->name);
-            free(obj->data);
-            free(obj);
-            tbl->num--;
-            assert(tbl->num >= 0);
-            return NULL;
-        }
-        // move red right
-        if (obj->right != NULL
-                && (!is_red(obj->right) && !is_red(obj->right->left))) {
-            obj = move_red_right(obj);
-        }
-        // found in the middle
-        if (tbl->compare(name, namesize, obj->name, obj->namesize) == 0) {
-            // copy min to this then remove min. What a genius inventor!
-            qtreetbl_obj_t *minobj = find_min(obj->right);
-            assert(minobj != NULL);
-            free(obj->name);
-            free(obj->data);
-            obj->name = qmemdup(minobj->name, minobj->namesize);
-            obj->namesize = minobj->namesize;
-            obj->data = qmemdup(minobj->data, minobj->datasize);
-            obj->datasize = minobj->datasize;
-            obj->right = remove_min(obj->right);
-            tbl->num--;
-        } else {
-            // keep going down to the right
-            obj->right = remove_obj(tbl, obj->right, name, namesize);
-        }
-    }
-    // Fix right-leaning red nodes on the way up.
-    return fix(obj);
+	if( tbl->compare( name, namesize, obj->name, obj->namesize ) < 0 )
+	{ // left
+		// move red left
+		if( obj->left && ( !is_red( obj->left ) && !is_red( obj->left->left ) ) )
+		{
+			obj = move_red_left( obj );
+		}
+		// keep going down to the left
+		obj->left = remove_obj( tbl, obj->left, name, namesize );
+	}
+	else
+	{ // right or equal
+		if( is_red( obj->left ) )
+		{
+			obj = rotate_right( obj );
+		}
+		// remove if equal at the bottom
+		if( tbl->compare( name, namesize, obj->name, obj->namesize ) == 0 &&
+		   obj->right == NULL )
+		{
+			free( obj->name );
+			free( obj->data );
+			free( obj );
+			tbl->num--;
+			assert( tbl->num >= 0 );
+			return NULL;
+		}
+		// move red right
+		if( obj->right != NULL &&
+		   ( !is_red( obj->right ) && !is_red( obj->right->left ) ) )
+		{
+			obj = move_red_right( obj );
+		}
+		// found in the middle
+		if( tbl->compare( name, namesize, obj->name, obj->namesize ) == 0 )
+		{
+			// copy min to this then remove min. What a genius inventor!
+			qtreetbl_obj_t* minobj = find_min( obj->right );
+			assert( minobj != NULL );
+			free( obj->name );
+			free( obj->data );
+			obj->name     = qmemdup( minobj->name, minobj->namesize );
+			obj->namesize = minobj->namesize;
+			obj->data     = qmemdup( minobj->data, minobj->datasize );
+			obj->datasize = minobj->datasize;
+			obj->right    = remove_min( obj->right );
+			tbl->num--;
+		}
+		else
+		{
+			// keep going down to the right
+			obj->right = remove_obj( tbl, obj->right, name, namesize );
+		}
+	}
+	// Fix right-leaning red nodes on the way up.
+	return fix( obj );
 }
 
-static void free_objs(qtreetbl_obj_t *obj) {
-    if (obj == NULL) {
-        return;
-    }
-    if (obj->left) {
-        free_objs(obj->left);
-    }
-    if (obj->right) {
-        free_objs(obj->right);
-    }
-    free_obj(obj);
+static void free_objs( qtreetbl_obj_t* obj )
+{
+	if( obj == NULL )
+	{
+		return;
+	}
+	if( obj->left )
+	{
+		free_objs( obj->left );
+	}
+	if( obj->right )
+	{
+		free_objs( obj->right );
+	}
+	free_obj( obj );
 }
 
-static void free_obj(qtreetbl_obj_t *obj) {
-    if (obj == NULL) {
-        return;
-    }
-    free(obj->name);
-    free(obj->data);
-    free(obj);
+static void free_obj( qtreetbl_obj_t* obj )
+{
+	if( obj == NULL )
+	{
+		return;
+	}
+	free( obj->name );
+	free( obj->data );
+	free( obj );
 }
 
-static uint8_t reset_iterator(qtreetbl_t *tbl) {
-    return (++tbl->tid);
-}
+static uint8_t reset_iterator( qtreetbl_t* tbl ) { return ( ++tbl->tid ); }
 
 #endif

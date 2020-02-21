@@ -35,10 +35,9 @@
  *   #define MAX_SEMAPHORES (2)
  *
  *   // create semaphores
- *   int semid = qsem_init("/some/file/for/generating/unique/key", 'q', MAX_SEMAPHORES, true);
- *   if(semid < 0) {
- *     printf("ERROR: Can't initialize semaphores.\n");
- *     return -1;
+ *   int semid = qsem_init("/some/file/for/generating/unique/key", 'q',
+ * MAX_SEMAPHORES, true); if(semid < 0) { printf("ERROR: Can't initialize
+ * semaphores.\n"); return -1;
  *   }
  *
  *   // fork childs
@@ -93,55 +92,64 @@
  * @param nsems     number of semaphores to initialize
  * @param recreate set to true to re-create semaphore if exists
  *
- * @return non-negative shared memory identifier if successful, otherwise returns -1
+ * @return non-negative shared memory identifier if successful, otherwise
+ * returns -1
  *
  * @code
  *   int semid = qsem_init("/tmp/mydaemon.pid", 'q', 10, true);
  * @endcode
  */
-int qsem_init(const char *keyfile, int keyid, int nsems, bool recreate) {
-    key_t semkey;
-    int semid;
+int qsem_init( const char* keyfile, int keyid, int nsems, bool recreate )
+{
+	key_t semkey;
+	int semid;
 
-    // generate unique key using ftok();
-    if (keyfile != NULL) {
-        semkey = ftok(keyfile, keyid);
-        if (semkey == -1)
-            return -1;
-    } else {
-        semkey = IPC_PRIVATE;
-    }
+	// generate unique key using ftok();
+	if( keyfile != NULL )
+	{
+		semkey = ftok( keyfile, keyid );
+		if( semkey == -1 )
+			return -1;
+	}
+	else
+	{
+		semkey = IPC_PRIVATE;
+	}
 
-    // create semaphores
-    if ((semid = semget(semkey, nsems, IPC_CREAT | IPC_EXCL | 0666)) == -1) {
-        if (recreate == false)
-            return -1;
+	// create semaphores
+	if( ( semid = semget( semkey, nsems, IPC_CREAT | IPC_EXCL | 0666 ) ) == -1 )
+	{
+		if( recreate == false )
+			return -1;
 
-        // destroy & re-create
-        if ((semid = qsem_getid(keyfile, keyid)) >= 0)
-            qsem_free(semid);
-        if ((semid = semget(semkey, nsems, IPC_CREAT | IPC_EXCL | 0666)) == -1)
-            return -1;
-    }
+		// destroy & re-create
+		if( ( semid = qsem_getid( keyfile, keyid ) ) >= 0 )
+			qsem_free( semid );
+		if( ( semid = semget( semkey, nsems, IPC_CREAT | IPC_EXCL | 0666 ) ) ==
+		   -1 )
+			return -1;
+	}
 
-    // initializing
-    int i;
-    for (i = 0; i < nsems; i++) {
-        struct sembuf sbuf;
+	// initializing
+	int i;
+	for( i = 0; i < nsems; i++ )
+	{
+		struct sembuf sbuf;
 
-        /* set sbuf */
-        sbuf.sem_num = i;
-        sbuf.sem_op = 1;
-        sbuf.sem_flg = 0;
+		/* set sbuf */
+		sbuf.sem_num = i;
+		sbuf.sem_op  = 1;
+		sbuf.sem_flg = 0;
 
-        /* initialize */
-        if (semop(semid, &sbuf, 1) != 0) {
-            qsem_free(semid);
-            return -1;
-        }
-    }
+		/* initialize */
+		if( semop( semid, &sbuf, 1 ) != 0 )
+		{
+			qsem_free( semid );
+			return -1;
+		}
+	}
 
-    return semid;
+	return semid;
 }
 
 /**
@@ -150,21 +158,23 @@ int qsem_init(const char *keyfile, int keyid, int nsems, bool recreate) {
  * @param keyfile   seed for generating unique IPC key
  * @param keyid     seed for generating unique IPC key
  *
- * @return non-negative shared memory identifier if successful, otherwise returns -1
+ * @return non-negative shared memory identifier if successful, otherwise
+ * returns -1
  */
-int qsem_getid(const char *keyfile, int keyid) {
-    int semid;
+int qsem_getid( const char* keyfile, int keyid )
+{
+	int semid;
 
-    /* generate unique key using ftok() */
-    key_t semkey = ftok(keyfile, keyid);
-    if (semkey == -1)
-        return -1;
+	/* generate unique key using ftok() */
+	key_t semkey = ftok( keyfile, keyid );
+	if( semkey == -1 )
+		return -1;
 
-    /* get current semaphore id */
-    if ((semid = semget(semkey, 0, 0)) == -1)
-        return -1;
+	/* get current semaphore id */
+	if( ( semid = semget( semkey, 0, 0 ) ) == -1 )
+		return -1;
 
-    return semid;
+	return semid;
 }
 
 /**
@@ -177,40 +187,44 @@ int qsem_getid(const char *keyfile, int keyid) {
  *
  * @note If the semaphore is already turned on, this will wait until released
  */
-bool qsem_enter(int semid, int semno) {
-    struct sembuf sbuf;
+bool qsem_enter( int semid, int semno )
+{
+	struct sembuf sbuf;
 
-    /* set sbuf */
-    sbuf.sem_num = semno;
-    sbuf.sem_op = -1;
-    sbuf.sem_flg = SEM_UNDO;
+	/* set sbuf */
+	sbuf.sem_num = semno;
+	sbuf.sem_op  = -1;
+	sbuf.sem_flg = SEM_UNDO;
 
-    /* lock */
-    if (semop(semid, &sbuf, 1) != 0)
-        return false;
-    return true;
+	/* lock */
+	if( semop( semid, &sbuf, 1 ) != 0 )
+		return false;
+	return true;
 }
 
 /**
- * Try to turn on the flag of semaphore. If it is already turned on, do not wait.
+ * Try to turn on the flag of semaphore. If it is already turned on, do not
+ * wait.
  *
  * @param semid     semaphore identifier
  * @param semno     semaphore number
  *
- * @return true if successful, otherwise(already turned on by other) returns false
+ * @return true if successful, otherwise(already turned on by other) returns
+ * false
  */
-bool qsem_enter_nowait(int semid, int semno) {
-    struct sembuf sbuf;
+bool qsem_enter_nowait( int semid, int semno )
+{
+	struct sembuf sbuf;
 
-    /* set sbuf */
-    sbuf.sem_num = semno;
-    sbuf.sem_op = -1;
-    sbuf.sem_flg = SEM_UNDO | IPC_NOWAIT;
+	/* set sbuf */
+	sbuf.sem_num = semno;
+	sbuf.sem_op  = -1;
+	sbuf.sem_flg = SEM_UNDO | IPC_NOWAIT;
 
-    /* lock */
-    if (semop(semid, &sbuf, 1) != 0)
-        return false;
-    return true;
+	/* lock */
+	if( semop( semid, &sbuf, 1 ) != 0 )
+		return false;
+	return true;
 }
 
 /**
@@ -219,37 +233,42 @@ bool qsem_enter_nowait(int semid, int semno) {
  * @param semid     semaphore identifier
  * @param semno     semaphore number
  * @param maxwaitms maximum waiting micro-seconds to release
- * @param forceflag status will be stored, it can be NULL if you don't need this information
+ * @param forceflag status will be stored, it can be NULL if you don't need
+ * this information
  *
  * @return true if successful, otherwise returns false
  *
  * @note
  * This will wait the semaphore to be released with in maxwaitms.
- * If it it released by locker normally with in maxwaitms, forceflag will be set to false.
- * But if maximum maxwaitms is exceed and the semaphore is released forcely, forceflag will
- * be set to true.
+ * If it it released by locker normally with in maxwaitms, forceflag will be
+ * set to false. But if maximum maxwaitms is exceed and the semaphore is
+ * released forcely, forceflag will be set to true.
  */
-bool qsem_enter_force(int semid, int semno, int maxwaitms, bool *forceflag) {
-    int wait;
-    for (wait = 0; wait < maxwaitms; wait += 10) {
-        if (qsem_enter_nowait(semid, semno) == true) {
-            if (forceflag != NULL)
-                *forceflag = false;
-            return true;
-        }
-        usleep(10 * 1000);  // sleep 10ms
-    }
+bool qsem_enter_force( int semid, int semno, int maxwaitms, bool* forceflag )
+{
+	int wait;
+	for( wait = 0; wait < maxwaitms; wait += 10 )
+	{
+		if( qsem_enter_nowait( semid, semno ) == true )
+		{
+			if( forceflag != NULL )
+				*forceflag = false;
+			return true;
+		}
+		usleep( 10 * 1000 ); // sleep 10ms
+	}
 
-    DEBUG("force to unlock semaphore %d-%d", semid, semno);
-    while (true) {
-        qsem_leave(semid, semno);
-        if (qsem_enter_nowait(semid, semno) == true)
-            break;
-    }
+	DEBUG( "force to unlock semaphore %d-%d", semid, semno );
+	while( true )
+	{
+		qsem_leave( semid, semno );
+		if( qsem_enter_nowait( semid, semno ) == true )
+			break;
+	}
 
-    if (forceflag != NULL)
-        *forceflag = true;
-    return true;
+	if( forceflag != NULL )
+		*forceflag = true;
+	return true;
 }
 
 /**
@@ -260,18 +279,19 @@ bool qsem_enter_force(int semid, int semno, int maxwaitms, bool *forceflag) {
  *
  * @return true if successful, otherwise returns false
  */
-bool qsem_leave(int semid, int semno) {
-    struct sembuf sbuf;
+bool qsem_leave( int semid, int semno )
+{
+	struct sembuf sbuf;
 
-    /* set sbuf */
-    sbuf.sem_num = semno;
-    sbuf.sem_op = 1;
-    sbuf.sem_flg = SEM_UNDO;
+	/* set sbuf */
+	sbuf.sem_num = semno;
+	sbuf.sem_op  = 1;
+	sbuf.sem_flg = SEM_UNDO;
 
-    /* unlock */
-    if (semop(semid, &sbuf, 1) != 0)
-        return false;
-    return true;
+	/* unlock */
+	if( semop( semid, &sbuf, 1 ) != 0 )
+		return false;
+	return true;
 }
 
 /**
@@ -282,10 +302,11 @@ bool qsem_leave(int semid, int semno) {
  *
  * @return true for the flag on, false for the flag off
  */
-bool qsem_check(int semid, int semno) {
-    if (semctl(semid, semno, GETVAL, 0) == 0)
-        return true;  // locked
-    return false;  // unlocked
+bool qsem_check( int semid, int semno )
+{
+	if( semctl( semid, semno, GETVAL, 0 ) == 0 )
+		return true; // locked
+	return false; // unlocked
 }
 
 /**
@@ -295,12 +316,13 @@ bool qsem_check(int semid, int semno) {
  *
  * @return true if successful, otherwise returns false
  */
-bool qsem_free(int semid) {
-    if (semid < 0)
-        return false;
-    if (semctl(semid, 0, IPC_RMID, 0) != 0)
-        return false;
-    return true;
+bool qsem_free( int semid )
+{
+	if( semid < 0 )
+		return false;
+	if( semctl( semid, 0, IPC_RMID, 0 ) != 0 )
+		return false;
+	return true;
 }
 
 #endif /* DISABLE_IPC */
