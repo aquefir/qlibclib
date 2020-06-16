@@ -102,7 +102,7 @@ GCNOFILES := $(CFILES:.c=.c.gcno) $(CPPFILES:.cpp=.cpp.gcno)
 GCDAFILES := $(CFILES:.c=.c.gcda) $(CPPFILES:.cpp=.cpp.gcda)
 
 NO_TES := 1
-CFLAGS += -std=c99
+CFLAGS += -std=c99 -D_DEFAULT_SOURCE
 
 .PHONY: default
 
